@@ -32,7 +32,7 @@ header {
 	width: 100%;
 	display: flex;
 	align-items: center;
-	background-color: var(--primary);
+	background-color: #c13515;
 	z-index: 1000;
 }
 

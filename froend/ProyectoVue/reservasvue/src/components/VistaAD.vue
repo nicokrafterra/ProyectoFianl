@@ -111,11 +111,11 @@ export default {
 <style scoped>
 /*Estilos generales para el template del html */ 
 .main-container {
-    --primary-color: #3841E6;
+    --primary-color: #c13515;
     --text: #EDF0F7;
     --sidebar-gray: #111926;
     --sidebar-gray-light: #F8F7FD;
-    --sidebar-gray-background: #6067EB;
+    --sidebar-gray-background: #db3d19;
     --success: #00C896;
     --white: #fff;
 }
