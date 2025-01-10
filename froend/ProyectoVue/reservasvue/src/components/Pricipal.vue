@@ -15,13 +15,11 @@ const router = useRouter();
 
 const usuario = computed(() => store.state.usuario);
 
-const imagenPorDefecto = "../assets/IMG/foto.png";
+const imagenPorDefecto = ref("../assets/IMG/foto.png");
 
+const img = ref(usuario.value.imagen)
 
-const imagenPerfil = ref(store.state.usuario.imagen
-  ? `http://localhost:8000/${store.state.usuario.imagen}`
-  : imagenPorDefecto);
-
+const imagenPerfil = ref(`http://localhost:8000/${img.value}`);
 
 
 
@@ -39,7 +37,23 @@ const handleClickOutside = (event) => {
 
 onMounted(() => {
 	document.addEventListener('click', handleClickOutside);
+	const usuarioGuardado = localStorage.getItem("usuario");
+	if (usuarioGuardado) {
+		store.commit("setUsuario", JSON.parse(usuarioGuardado));
+	}
+
+	store.watch(
+		(state) => state.usuario,
+		(nuevoUsuario) => {
+			localStorage.setItem("usuario", JSON.stringify(nuevoUsuario));
+		}
+
+	);
+	imagenPerfil
 });
+
+
+
 
 onBeforeUnmount(() => {
 	document.removeEventListener('click', handleClickOutside);
@@ -57,18 +71,20 @@ onBeforeUnmount(() => {
 					d="M410.988 255.56L0 995.337H189.802L505.141 427.427L410.988 255.56ZM1102.94 995.337L647.119 170.373L551.471 0L457.317 170.373L551.471 340.746L711.79 629.718H498.683L405.461 786.972H799.034L914.634 995.337H1102.94Z"
 					fill="#FAFBFC" />
 			</svg>
+			<p></p>
 		</div>
 		<span class="navegar__Usuario">
-			<router-link class="icon" to="/pqr">
+			<router-link class="icon-p" to="/pqr">
 				<img class="icon" src="../assets/IMG/message.svg" alt="Mensaje" />
 			</router-link>
-			<router-link class="icon" to="/TablaPqrRes">
-			<img class="icon" src="../assets/IMG/notification.svg" alt="Notificación" />
+			<router-link class="icon-p" to="/TablaPqrRes">
+				<img class="icon" src="../assets/IMG/notification.svg" alt="Notificación" />
 			</router-link>
-			<img  class="perfil" :src="imagenPerfil" :key="imagenPerfil" alt="Imagen de perfil"  @click="toggleDropdown" />
+			<img class="perfil" :src="imagenPerfil" :key="imagenPerfil" alt="Imagen de perfil"
+				@click="toggleDropdown" />
 		</span>
 
-		
+
 		<div class="Menu-desple" :class="{ hide: isHidden, 'Menu-desple-gable': isFading }" ref="Menu">
 			<div class="Menu__group">
 				<div class="nombre-usuario">{{ usuario.nombre }}</div>
@@ -111,22 +127,29 @@ onBeforeUnmount(() => {
 	<main class="main-content">
 
 		<section class="container top-categories">
-			<h1 class="heading-1">Mejores Experiencias</h1>
+			<h1 class="heading-1">Nuestras Experiencias</h1>
 			<div class="container-categories">
 				<div class="card-category category-moca">
 					<img class="Img-PrimerCard" src="../assets/IMG/campfire-896196_1280.jpg" alt="">
-					<p>Camping a campo avierto</p>
-					<span>Ver más</span>
+					<p>Camping a campo abierto</p>
+					<router-link to="Camping"><span>Ver más</span></router-link>
 				</div>
 				<div class="card-category category-moca">
 					<img class="Img-PrimerCard" src="..\assets\IMG\bike-2388449_1280.jpg" alt="">
 					<p>Recorrido guiado</p>
-					<span>Ver más</span>
+					<router-link to="Recorrido"><span>Ver más</span></router-link>
+				</div>
+				<div class="card-category category-moca">
+					<img class="Img-PrimerCard" src="..\assets/IMG/Eventossss.jpg" alt="">
+					<p>Reserva lugares para eventos</p>
+					<router-link to="/Eventos"><span>Ver más</span></router-link>
+
 				</div>
 				<div class="card-category category-moca">
 					<img class="Img-PrimerCard" src="..\assets\IMG\event-6927353_1280.jpg" alt="">
-					<p>Reserva de eventos programados</p>
-					<span>Ver más</span>
+					<p>Reserva de Mesas</p>
+					<router-link to="/Mesas"><span>Ver más</span></router-link>
+
 				</div>
 			</div>
 		</section>
@@ -403,7 +426,7 @@ onBeforeUnmount(() => {
 	</footer>
 </template>
 
-<style >
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 
@@ -426,7 +449,7 @@ header {
 	width: 100%;
 	display: flex;
 	align-items: center;
-	background-color: #c13515;
+	background-color: var(--primary);
 	justify-content: end;
 	z-index: 1000;
 }
@@ -441,13 +464,17 @@ header {
 
 .navegar__Usuario>.icon {
 	cursor: pointer;
-	width: 45px;
-	height: 40px;
-	transition: all 0.2s ease-in-out;
+	width: 50px;
+	height: 50px;
+	transition: all 0.5s ease-in-out;
 }
 
 .navegar__Usuario>.icon:hover {
 	transform: scale(1.1);
+}
+
+.navegar__Usuario>.icon-p:hover {
+	transform: scale(1.3);
 }
 
 .nombre-usuario {
@@ -466,13 +493,14 @@ header {
 	height: 50px;
 	cursor: pointer;
 	/*border-radius: 50%;*/
-	border: 3px solid #f7f7f7;
+	border: 2px solid #ffffff;
 	filter: drop-shadow(-20px 0 10px rgba(0, 0, 0, 0.1));
+	border-radius: 50%
 }
 
 .perfil:hover {
-	transform: scale(1.05);
-	transition: all 0.2s ease-in-out;
+	transform: scale(1.1);
+	transition: all 0.4s ease-in-out;
 }
 
 .email {
@@ -1175,7 +1203,7 @@ nav>ul>li:hover {
 		max-width: 100%;
 	}
 
-	.IMG-Platos{
+	.IMG-Platos {
 		width: 300px;
 	}
 
@@ -1229,7 +1257,8 @@ nav>ul>li:hover {
 	.card-blog {
 		flex-basis: 48%;
 	}
-	.IMG-Platos{
+
+	.IMG-Platos {
 		width: 300px;
 		height: 200px;
 	}

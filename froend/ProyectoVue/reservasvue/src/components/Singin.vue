@@ -74,7 +74,7 @@ export default {
 					} else {
 						this.$router.push("/index");
 					}
-				}, 3000);
+				}, 1000);
 			} catch (error) {
 				Swal.fire({
 					icon: "error",

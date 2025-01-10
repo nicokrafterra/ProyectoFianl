@@ -5,16 +5,19 @@
 		</button>
 		<div class="reserva-form">
 			<div class="form">
-				
 				<form @submit.prevent="hacerReserva">
 					<h2>Formulario de Reserva</h2>
-					<div class="form-group ">
-						<label for="fecha">Fecha de Reserva:</label>
-						<input type="date" id="fecha" v-model="fecha" :min="minFecha" required />
-					</div>
 
 					<div class="form-group">
-						<label for="tipo_Reserva">Tipo de Reserva:</label>
+						<RouterLink class="reserva-button" to="tpPlan">Selecciona el Tipo de Plan</RouterLink>
+					</div>
+					<label for="fecha">Fecha de Reserva: </label>
+					<div class="form-group">
+						<input type="datetime-local" id="fecha" v-model="fecha" :min="minFecha"
+						required />
+					</div>
+					<label for="tipo_Reserva">Tipo de Reserva: </label>
+					<div class="form-group">
 						<select id="tipo_Reserva" v-model="tipo_Reserva" required>
 							<option disabled value="">Selecciona un tipo de reserva</option>
 							<option value="basica">Reserva Básica</option>
@@ -22,9 +25,12 @@
 						</select>
 					</div>
 
-					<button type="submit" class="reserva-button">Hacer Reserva</button>
+					<div v-if="descripcionReserva" class="texto-descriptivo">
+						<p>{{ descripcionReserva }}</p>
+					</div>
 
-					<!-- Botón para ver todas las reservas -->
+
+					<button type="submit" class="reserva-button">Hacer Reserva</button>
 					<button class="ver-reservas-button" @click="verReservas">Ver todas mis reservas</button>
 				</form>
 			</div>
@@ -43,24 +49,58 @@ const router = useRouter();
 
 const usuario = computed(() => store.state.usuario);
 
+const tipoPlan = computed(() => store.getters.obtenerTipoPlan);
 
 const fecha = ref('');
 const tipo_Reserva = ref('');
-const minFecha = ref(new Date().toISOString().split('T')[0]);
+const tipo_Plan = ref('');
+const minFecha = ref('');
+
+// Dentro de setup()
+minFecha.value = (() => {
+    // Crea una nueva fecha con cualquier fecha que se pase, pero establece la hora a las 10:00 AM
+    const ahora = new Date();
+    // Establecer la fecha actual (sin importar la hora) a las 10 AM
+    const fechaMinima = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 10, 0, 0);
+    return fechaMinima.toISOString().slice(0, 16); // Retorna la fecha con hora mínima a las 10 AM
+})();
 
 
 const volver = () => {
-	router.back();
+	router.push('/index');
 };
 
 
+const descripcionReserva = computed(() => {
+	if (tipo_Reserva.value === 'basica') {
+		return "La reserva básica ofrece acceso estándar a nuestras instalaciones con un costo más económico.";
+	} else if (tipo_Reserva.value === 'premium') {
+		return "La reserva premium incluye servicios exclusivos como acceso VIP y opciones personalizadas.";
+	}
+	return "";
+});
+
 const hacerReserva = async () => {
+	if (!tipoPlan.value || !tipoPlan.value.tipo) {
+		Swal.fire({
+			icon: 'warning',
+			title: 'Selección de Plan',
+			text: 'Por favor, selecciona el tipo de plan que deseas.',
+			confirmButtonColor: '#d33',
+		});
+		return;
+	}
+
 	const reservaData = {
 		usuario_id: usuario.value.id,
+		plan_id: tipoPlan.value.id,
 		fecha: fecha.value,
 		tipo_Reserva: tipo_Reserva.value,
+		tipo_Plan: tipoPlan.value.tipo,
+		Detalle: tipoPlan.value.nombre,
 		pagada: false,
 	};
+
 
 	console.log("Datos enviados:", reservaData);
 
@@ -84,15 +124,17 @@ const hacerReserva = async () => {
 
 		fecha.value = '';
 		tipo_Reserva.value = '';
+		tipo_Plan.value = '';
 
+		store.dispatch("resetTipoPlan");
 
+		console.log(store.state.tipoPlan);
 		Swal.fire({
 			icon: 'success',
 			title: 'Reserva exitosa',
 			text: 'Tu reserva ha sido realizada con éxito.',
 			confirmButtonColor: '#3085d6',
 		});
-
 	} catch (error) {
 		console.error('Error:', error);
 		Swal.fire({
@@ -102,17 +144,22 @@ const hacerReserva = async () => {
 			confirmButtonColor: '#d33',
 		});
 	}
-};
+}
 
 
 const verReservas = () => {
 	router.push('/ResVer');
 };
+
 </script>
+
+
 
 <style scoped>
 .contpri {
 	height: 100vh;
+	display: flex;
+	justify-content: center;
 }
 
 .back-button {
@@ -127,14 +174,14 @@ const verReservas = () => {
 	width: 60px;
 }
 
-.back-button:hover{
+.back-button:hover {
 	transform: scale(1.05);
 	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
 		inset 2px 2px 10px rgba(0, 0, 0, 1),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-		background-color: #002e02;
-		border-radius: 6px;
+	background-color: #002e02;
+	border-radius: 6px;
 }
 
 .back-button img {
@@ -162,28 +209,30 @@ const verReservas = () => {
 	font-size: 15px;
 	font-weight: bold;
 	transition: 0.35s;
+	text-decoration: none;
+	width: 250px;
 }
 
 .reserva-button:hover {
-	transform: scale(1.05);
+	transform: scale(1.01);
 	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
 		inset 2px 2px 10px rgba(0, 0, 0, 1),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 	background-color: #002e02;
-	margin-right: 5px;
+	margin-right: 1px;
 }
 
 body {
 	height: 100vh;
 	overflow: hidden;
 	font-family: "Poppins", sans-serif;
-	background: #0e2941;
+	display: flex;
+	background-size: cover;
 }
 
 .reserva-form {
 	width: 400px;
-	margin: auto;
 }
 
 .form {
@@ -192,6 +241,7 @@ body {
 	justify-content: center;
 	align-items: center;
 	position: absolute;
+	margin-top: 70px;
 	backface-visibility: hidden;
 	padding: 65px 45px;
 	border-radius: 15px;
@@ -230,16 +280,17 @@ body {
 	font-weight: bold;
 	transition: 0.35s;
 	margin-left: 10px;
+	width: 250px;
 }
 
 .form .ver-reservas-button:hover {
-	transform: scale(1.05);
+	transform: scale(1.01);
 	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
 		inset 2px 2px 10px rgba(0, 0, 0, 1),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 	background-color: #002e02;
-	margin-left: 10px;
+	margin-left: 11px;
 }
 
 .form-group {
@@ -247,5 +298,62 @@ body {
 	justify-content: center;
 	align-items: center;
 	display: flex;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.texto-descriptivo {
+	margin: 20px;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	width: 400px;
+	text-align: center;
+}
+
+#tipo_Reserva {
+	width: 320px;
+}
+
+#fecha {
+	width: 310px;
+}
+
+@media (max-width: 768px) {
+	.form {
+		padding: 20px;
+	}
+
+	.form input,
+	.form select {
+		max-width: 100%;
+	}
+
+	.reserva-button,
+	.ver-reservas-button {
+		max-width: 100%;
+	}
+}
+
+@media (max-width: 480px) {
+	.form {
+		padding: 15px;
+	}
+
+	.form input,
+	.form select {
+		font-size: 14px;
+		padding: 5px;
+	}
+
+	.reserva-button,
+	.ver-reservas-button {
+		font-size: 14px;
+		padding: 8px 20px;
+	}
+
+	.texto-descriptivo {
+		font-size: 12px;
+	}
 }
 </style>

@@ -81,7 +81,8 @@ export default {
 			return passwordRegex.test(password);
 		},
 		validateNumeroCelular(numero) {
-			return numero.length >= 10;
+			const numeroRegex = /^[0-9]+$/;
+			return numeroRegex.test(numero) && numero.length >= 10;
 		},
 		...mapActions(["registerUsuario"]),
 		async handleRegister() {
@@ -127,12 +128,12 @@ export default {
 				valid = false;
 			}
 
-			if (
-				!this.numeroCelular ||
-				!this.validateNumeroCelular(this.numeroCelular)
-			) {
+			if (!this.numeroCelular) {
+				this.celularError = "El número de celular es obligatorio.";
+				valid = false;
+			} else if (!this.validateNumeroCelular(this.numeroCelular)) {
 				this.celularError =
-					"Por favor, introduce un número de celular válido (mínimo 10 dígitos).";
+					"Por favor, introduce un número de celular válido (solo números, mínimo 10 dígitos).";
 				valid = false;
 			}
 
@@ -169,7 +170,7 @@ export default {
 						} else {
 							this.$router.push("/index");
 						}
-					}, 3000);
+					}, 1000);
 				} catch (error) {
 					console.error("Error al registrar el usuario:", error);
 					Swal.fire({
@@ -286,5 +287,4 @@ export default {
 .signup_tog:hover {
 	text-decoration: underline;
 }
-
 </style>

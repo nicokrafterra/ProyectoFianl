@@ -1,33 +1,39 @@
 <template>
-	<button class="back-button" @click="volver">
-		<img src="../assets/IMG/arrow-left.svg" alt="Volver" />
-	</button>
-	<div class="reservas-container">
-		<h2>Mis Reservas</h2>
-		<table v-if="reservas.length > 0">
-			<thead>
-				<tr>
-					<th>Fecha</th>
-					<th>Estado</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr v-for="reserva in reservas" :key="reserva.id">
-					<td>{{ reserva.fecha }}</td>
-					<td>
-						<button 
-							v-if="!reserva.pagada" 
-							@click="pagarReserva(reserva.id)" 
-							class="action-button pagar">
-							💳 Pagar
-						</button>
-						<span v-else class="estado-pagado">✔️ Pagada</span>
-						<button @click="eliminarReserva(reserva.id)" class="action-button delete">🗑️</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		<p v-else>No tienes reservas registradas.</p>
+	<div class="contpri">
+		<button class="back-button" @click="volver">
+			<img src="../assets/IMG/arrow-left.svg" alt="Volver" />
+		</button>
+		<div class="reservas-container">
+			<h2>Mis Reservas</h2>
+			<table v-if="reservas.length > 0">
+				<thead>
+					<tr>
+						<th>Fecha</th>
+						<th>Tipo de Paquete</th>
+						<th>Detalle</th>
+						<th>Tipo de Plan</th>
+						<th>Estado</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="reserva in reservas" :key="reserva.id">
+						<td>{{ reserva.fecha }}</td>
+						<td>{{ reserva.tipo_Reserva }}</td>
+						<td>{{ reserva.Detalle }}</td>
+						<td>{{ reserva.tipo_Plan }}</td>
+						<td>
+							<button v-if="!reserva.pagada" @click="pagarReserva(reserva.id)"
+								class="action-button pagar">
+								💳 Pagar
+							</button>
+							<span v-else class="estado-pagado">✔️ Pagada</span>
+							<button @click="eliminarReserva(reserva.id)" class="action-button delete">🗑️</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<p v-else>No tienes reservas registradas.</p>
+		</div>
 	</div>
 </template>
 
@@ -47,7 +53,6 @@ const volver = () => {
 	router.back();
 };
 
-// Obtener reservas del usuario
 const obtenerReservas = async () => {
 	try {
 		const response = await axios.get(`http://localhost:8000/reservas/${usuario.value.id}/user`);
@@ -57,19 +62,18 @@ const obtenerReservas = async () => {
 	}
 };
 
-// Método para pagar una reserva
+
 const pagarReserva = async (id) => {
 	try {
 		const response = await axios.post(`http://localhost:8000/reservas/${id}/pagar`);
 		if (response.status === 200) {
-			// Actualizar el estado de la reserva
 			const updatedReserva = response.data;
 			const index = reservas.value.findIndex(reserva => reserva.id === id);
 			if (index !== -1) {
 				reservas.value[index] = updatedReserva;
 			}
-			
-			// Mostrar la alerta de éxito con SweetAlert
+
+
 			Swal.fire({
 				icon: 'success',
 				title: 'Reserva pagada',
@@ -78,7 +82,7 @@ const pagarReserva = async (id) => {
 			});
 		}
 	} catch (error) {
-		// Mostrar alerta en caso de error
+
 		Swal.fire({
 			icon: 'error',
 			title: 'Error',
@@ -89,15 +93,13 @@ const pagarReserva = async (id) => {
 	}
 };
 
-// Método para eliminar una reserva
+
 const eliminarReserva = async (id) => {
 	try {
 		const response = await axios.delete(`http://localhost:8000/reservas/${id}`);
 		if (response.status === 200) {
-			// Eliminar la reserva de la lista local
+
 			reservas.value = reservas.value.filter(reserva => reserva.id !== id);
-			
-			// Mostrar la alerta de éxito con SweetAlert
 			Swal.fire({
 				icon: 'success',
 				title: 'Reserva eliminada',
@@ -106,7 +108,6 @@ const eliminarReserva = async (id) => {
 			});
 		}
 	} catch (error) {
-		// Mostrar alerta en caso de error
 		Swal.fire({
 			icon: 'error',
 			title: 'Error',
@@ -129,6 +130,10 @@ onMounted(obtenerReservas);
 	padding: 20px;
 	border-radius: 10px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.contpri{
+	height: 100vh;
 }
 
 h2 {

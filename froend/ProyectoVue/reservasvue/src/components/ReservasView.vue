@@ -1,4 +1,5 @@
 <template>
+	<div class="contpri">
 	<button class="back-button" @click="volver">
 		<img src="../assets/IMG/arrow-left.svg" alt="Volver" />
 	</button>
@@ -11,6 +12,8 @@
 						<th>ID Reservas</th>
 						<th>Cliente</th>
 						<th>Fecha</th>
+						<th>Tipo PLan</th>
+						<th>Nombre Plan</th>
 						<th>Estado</th>
 						<th>Acciones</th>
 					</tr>
@@ -20,9 +23,12 @@
 						<td>{{ reserva.id }}</td>
 						<td>{{ reserva.usuario_id }}</td>
 						<td>{{ reserva.fecha }}</td>
+						<td>{{ reserva.tipo_Plan }}</td>
+						<td>{{ reserva.Detalle }}</td>
 						<td :class="{'estado-pagado': reserva.pagada, 'estado-pendiente': !reserva.pagada}">
 							{{ reserva.pagada ? '✔️ Pagada' : '❌ Pendiente' }}
 						</td>
+
 						<td>
 							<button @click="eliminarReserva(reserva.id)" class="action-button delete">🗑️</button>
 						</td>
@@ -31,9 +37,13 @@
 			</table>
 		</div>
 	</nav>
+	</div>
 </template>
 
 <style scoped>
+.contpri{
+	height: 100vh;
+}
 .reservas-container {
 	width: 80%;
 	margin: auto;

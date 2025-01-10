@@ -1,16 +1,15 @@
 <template>
 	<button class="back-button" @click="volver">
-		<img src="../assets/IMG/arrow-left.svg" alt="Volver" />
+			<img src="../assets/IMG/arrow-left.svg" alt="Volver" />
 	</button>
 	<div class="configuracion">
-		<div class="menu">
-			<h2>Configuración</h2>
-			<router-link class="config-button" to="/updateCorreo">Actualizar Correo</router-link>
-			<router-link class="config-button" to="/updateContra">Actualizar Contraseña</router-link>
-			<button class="config-button" @click="seleccionarImagen">Cambiar Foto</button>
-			<button class="config-button eliminar-button" @click="eliminarCuenta">Eliminar Cuenta</button>
-			<input type="file" ref="imagenInput" @change="cambiarFoto" style="display: none;" />
-		</div>
+			<div class="menu">
+					<h2>Tipos de Planes</h2>
+					<router-link class="config-button" to="/camping">Campings</router-link>
+					<router-link class="config-button" to="/recorrido">Recorridos</router-link>
+					<router-link class="config-button" to="/mesas">Mesas</router-link>
+					<router-link class="config-button" to="/eventos">Eventos</router-link>
+			</div>
 	</div>
 </template>
 
@@ -29,68 +28,11 @@ const volver = () => {
 	router.back();
 };
 
-const usuario = computed(() => store.state.usuario);
 
-const seleccionarImagen = () => {
-	imagenInput.value.click(); // Abrir el selector de archivos
-};
-
-const cambiarFoto = async (event) => {
-	const archivo = event.target.files[0];
-	if (!archivo) return;
-
-	const formData = new FormData();
-	formData.append("file", archivo);
-
-	try {
-		const response = await axios.put(`http://localhost:8000/usuarios/${usuario.value.id}/actualizar-foto`, formData, {
-			headers: { "Content-Type": "multipart/form-data" },
-		});
-		Swal.fire({
-			icon: 'success',
-			title: 'Imagen actualizada',
-			text: 'Tu foto de perfil se ha actualizado correctamente.',
-		});
-
-		const nuevaRuta = response.data.ruta; 
-		store.commit('actualizarFoto', nuevaRuta); 
-
-	} catch (error) {
-		console.error("Error al subir la imagen:", error);
-		Swal.fire({
-			icon: 'error',
-			title: 'Error',
-			text: 'No se pudo actualizar la foto de perfil.',
-		});
-	}
-};
-
-
-const eliminarCuenta = async () => {
-	try {
-		await axios.delete(`http://localhost:8000/usuarios/${usuario.value.id}`);
-		store.commit('logoutUsuario');
-		Swal.fire({
-			icon: 'success',
-			title: 'Cuenta eliminada exitosamente',
-			text: 'Redirigiendo...',
-			timer: 2000,
-			showConfirmButton: false,
-		}).then(() => {
-			router.push('/');
-		});
-	} catch (error) {
-		console.error("Error al eliminar la cuenta:", error);
-		Swal.fire({
-			icon: 'error',
-			title: 'Error',
-			text: 'No se pudo eliminar la cuenta.',
-		});
-	}
-};
 </script>
 
 <style scoped>
+/* Estilos del botón "Volver" */
 .back-button {
 	position: absolute;
 	top: 20px;
@@ -101,14 +43,14 @@ const eliminarCuenta = async () => {
 	transition: 0.35s;
 }
 
-.back-button:hover {
+.back-button:hover{
 	transform: scale(1.05);
 	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
 		inset 2px 2px 10px rgba(0, 0, 0, 1),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #002e02;
-	border-radius: 6px;
+		background-color: #002e02;
+		border-radius: 6px;
 }
 
 .back-button img {
@@ -164,6 +106,7 @@ const eliminarCuenta = async () => {
 	font-weight: bold;
 	transition: 0.35s;
 	text-decoration: none;
+	width: 100px;
 }
 
 .config-button:hover {
@@ -172,7 +115,7 @@ const eliminarCuenta = async () => {
 		1px 1px 10px rgba(255, 255, 255, 0.6),
 		inset 2px 2px 10px rgba(0, 0, 0, 1),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #002e0d;
+		background-color: #002e0d;
 }
 
 
@@ -196,6 +139,6 @@ const eliminarCuenta = async () => {
 		1px 1px 10px rgba(255, 255, 255, 0.6),
 		inset 2px 2px 10px rgba(0, 0, 0, 1),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #2e0000;
+		background-color: #2e0000;
 }
 </style>

@@ -16,7 +16,8 @@ const route = useRoute();
 
 <style>
 body{
-	background: linear-gradient(0deg, rgba(193,53,21,1) 0%, rgba(47,79,79,1) 49%, rgba(193,53,21,1) 100%);
+	background-image: url("./assets/IMG/BackgraudPagina12345.jpg");
+	background-size: cover;
 	background-repeat: no-repeat;
 	background-position: 100%;
 }

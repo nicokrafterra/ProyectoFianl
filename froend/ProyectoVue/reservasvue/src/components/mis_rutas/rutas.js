@@ -18,6 +18,13 @@ import TablaPqrs from "../tablaPqrs.vue";
 import TablaPqrsRespondidos from "../TablaPqrsRespondidos.vue";
 import UpdateContra from "../updateContra.vue";
 import UpdateCorreo from "../updateCorreo.vue";
+import Campings from "../Campings.vue";
+import Eventos from "../Eventos.vue";
+import Mesas from "../Mesas.vue";
+import Recorrido from "../Recorrido.vue";
+import TiposPlan from "../tiposPlan.vue";
+import FormPlanes from "../FormPlanes.vue";
+import PlanesVer from "../planesVer.vue";
 
 const routes = [
     {
@@ -116,6 +123,41 @@ const routes = [
         path: '/updateCorreo',
         name: 'ipdateCorreo',
         component:UpdateCorreo
+    },
+    {
+        path: '/camping',
+        name: 'camping',
+        component:Campings
+    },
+    {
+        path: '/eventos',
+        name: 'eventos',
+        component:Eventos
+    },
+    {
+        path: '/mesas',
+        name: 'mesas',
+        component:Mesas
+    },
+    {
+        path: '/recorrido',
+        name: 'recorrido',
+        component:Recorrido
+    },
+    {
+        path: '/tpPlan',
+        name: 'tpPlan',
+        component:TiposPlan
+    },
+    {
+        path: '/formPlan',
+        name: 'formPlan',
+        component: FormPlanes
+    },
+    {
+        path: '/planVer',
+        name: 'planVer',
+        component: PlanesVer
     }
 ];
 const router = createRouter({

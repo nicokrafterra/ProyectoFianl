@@ -1,0 +1,250 @@
+<template>
+	<div class="contpri">
+		<button class="back-button" @click="volver">
+			<img src="../assets/IMG/arrow-left.svg" alt="Volver" />
+		</button>
+		<section class="mesas-section">
+			<div class="section-header">
+				<h1 class="section-title">Explora Nuestras Mesas</h1>
+				<p class="section-description">
+					Encuentra la mesa perfecta para tus eventos, reuniones o cenas especiales.
+				</p>
+			</div>
+
+			<div class="mesas-container">
+				<div class="mesa-card" v-for="(mesa, index) in Mesas" :key="index">
+					<div class="mesa-info">
+						<h2 class="mesa-name">{{ mesa.nombre }}</h2>
+						<p class="mesa-description">{{ mesa.descripcion }}</p>
+						<div v-if="mesa.disponible">
+              <p class="available-info">
+                Quedan {{ mesa.cantidad_maxima-mesa.cantidad_actual }} disponibles
+              </p>
+						<button class="select-button" @click="seleccionarMesa(mesa)">
+							Reservar
+						</button>
+            </div>
+            <div v-else>
+              <p class="unavailable-info">No disponible</p>
+            </div>
+
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
+import axios from 'axios';
+
+// Acceso al store y router
+const store = useStore();
+const router = useRouter();
+
+// Computed para obtener el usuario
+const usuario = computed(() => store.state.usuario);
+
+// Función para volver a la página anterior
+const volver = () => {
+	router.back();
+};
+
+const Mesas = ref({})
+
+const obtenerMesas = async () => {
+	try {
+		const response = await axios.get("http://127.0.0.1:8000/planes/Mesa/tipo");
+		Mesas.value = response.data;
+	} catch (error) {
+		console.error("Error al obtener los lugares:", error);
+		Swal.fire({
+			icon: 'error',
+			title: 'Error',
+			text: 'No se pudieron cargar los lugares. Intenta nuevamente más tarde.',
+		});
+	}
+};
+
+// Función para manejar la selección de una mesa
+const seleccionarMesa = (mesa) => {
+
+	if (!usuario.value) {
+		Swal.fire({
+			icon: 'warning',
+			title: 'Inicia sesión',
+			text: 'Debes iniciar sesión para reservar un lugar.',
+		});
+		return;
+	}
+
+	store.dispatch("guardarTipoPlan", mesa);
+	router.push("/reservas");
+
+	Swal.fire({
+		icon: 'success',
+		title: 'Se guardo tu seleccion, completa el formulario',
+		text: `Has reservado el lugar "${mesa.nombre}" para tu evento.`,
+	}).then(() => {
+		// Aquí puedes agregar lógica para guardar la reserva en el backend
+		console.log(`Lugar reservado: ${mesa.nombre}`);
+	});
+};
+
+onMounted(obtenerMesas)
+</script>
+
+<style scoped>
+.contpri {
+  padding: 20px;
+  background: linear-gradient(135deg, #74b9ff, #a29bfe);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.back-button img {
+  width: 35px;
+  height: 35px;
+  filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2));
+}
+
+.back-button:hover {
+  transform: scale(1.1);
+}
+
+.mesas-section {
+  background-color: #ffffff;
+  padding: 40px 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 1200px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-title {
+  font-size: 2.8em;
+  margin-bottom: 15px;
+  color: #2d3436;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-description {
+  font-size: 1.2em;
+  color: #636e72;
+  line-height: 1.5;
+}
+
+.mesas-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.mesa-card {
+  background: #ffffff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mesa-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.mesa-info {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+  color: #2c3e50;
+}
+
+.mesa-name {
+  font-size: 1.8em;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #1e272e;
+}
+
+.mesa-description {
+  font-size: 1.1em;
+  color: #636e72;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.available-info {
+  font-size: 1em;
+  font-weight: bold;
+  color: #27ae60;
+  margin-bottom: 10px;
+}
+
+.unavailable-info {
+  font-size: 1em;
+  font-weight: bold;
+  color: #d63031;
+}
+
+.select-button {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: #ffffff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.select-button:hover {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .mesas-container {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 2.2em;
+  }
+
+  .section-description {
+    font-size: 1em;
+  }
+
+  .select-button {
+    font-size: 0.9em;
+  }
+}
+</style>

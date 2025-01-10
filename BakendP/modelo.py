@@ -1,6 +1,8 @@
-from sqlalchemy import String, Integer, Column, Date, Boolean, ForeignKey
+from sqlalchemy import  DateTime, ForeignKey,Column, Integer, String, Boolean, Text, Enum, Index
 from conexion import base
 from sqlalchemy.orm import relationship
+
+import enum
 
 class Usuario(base):
     __tablename__ = "usuarios"
@@ -17,16 +19,28 @@ class Usuario(base):
     # Relación con la tabla Pqr
     pqr_entries = relationship("Pqr", back_populates="usuario", cascade="all, delete-orphan")
 
+class TipoPlan(enum.Enum):
+    Recorrido = "Recorrido"
+    Mesa = "Mesa"
+    Camping = "Camping"
+    Evento = "Evento"
+
 class Reserva(base):
     __tablename__ = "reservas"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id", ondelete="CASCADE"))
-    fecha = Column(Date, nullable=False)
-    tipo_Reserva = Column(String(225), nullable=False)  
+    plan_id = Column(Integer, ForeignKey("planes.id", ondelete="CASCADE"))
+    fecha = Column(DateTime, nullable=False) 
+    tipo_Reserva = Column(String(225), nullable=False) 
+    tipo_Plan = Column(Enum(TipoPlan), nullable=False)
+    Detalle = Column(String(225), nullable=False)
     pagada = Column(Boolean, default=False)
 
     usuario = relationship("Usuario", back_populates="reservas")
-
+    
+    plan = relationship("Plan", back_populates="reservas", lazy="joined")
+    
+    
 class Pqr(base):
     __tablename__ = "pqr"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -36,3 +50,18 @@ class Pqr(base):
     respuesta = Column(String(255), nullable=True) 
 
     usuario = relationship("Usuario", back_populates="pqr_entries")
+
+
+
+class Plan(base):
+    __tablename__ = 'planes'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(50), nullable=False)
+    descripcion = Column(Text)
+    tipo = Column(Enum(TipoPlan), nullable=False) 
+    cantidad_maxima = Column(Integer, nullable=False)
+    cantidad_actual = Column(Integer, default=0)
+    disponible = Column(Boolean, default=True)
+    
+    reservas = relationship("Reserva", back_populates="plan")
