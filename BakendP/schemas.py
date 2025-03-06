@@ -34,7 +34,7 @@ class PQRS(BaseModel):
     respuesta: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         
 class RespuestaPQR(BaseModel):
     respuesta: str  
@@ -63,4 +63,4 @@ class PlanResponse(PlanBase):
     disponible: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
