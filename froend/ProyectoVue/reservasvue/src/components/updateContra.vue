@@ -22,6 +22,7 @@
 import axios from 'axios';
 import { mapState } from 'vuex';
 import Swal from 'sweetalert2';
+import { jwtDecode } from 'jwt-decode'; // Importamos la librería para decodificar JWT
 
 export default {
 	data() {
@@ -31,43 +32,76 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['usuario']),
+		...mapState(['usuario', 'token']),
+		userId() {
+			// Si Vuex tiene el ID, lo usa. Si no, lo extrae del token JWT.
+			if (this.usuario?.id) {
+				return this.usuario.id;
+			}
+			if (this.token) {
+				try {
+					const decoded = jwtDecode(this.token); // Decodifica el token
+					return decoded.sub; // "sub" es el ID del usuario en el token JWT
+				} catch (error) {
+					console.error("Error decodificando el token:", error);
+					return null;
+				}
+			}
+			return null;
+		},
 	},
 	methods: {
 		async updatePassword() {
 			try {
-				if (!this.usuario || !this.usuario.id) {
-					alert('El ID de usuario no está disponible');
+				if (!this.userId) {
+					Swal.fire("Error", "No se encontró el ID del usuario. Intenta iniciar sesión nuevamente.", "error");
 					return;
 				}
 
-				// Validación básica
 				if (!this.currentPassword || !this.newPassword) {
-					alert('Por favor, completa todos los campos.');
+					Swal.fire("Error", "Por favor, completa todos los campos.", "error");
 					return;
 				}
 
 				if (this.currentPassword === this.newPassword) {
-					alert('La nueva contraseña no puede ser igual a la actual.');
+					Swal.fire("Error", "La nueva contraseña no puede ser igual a la actual.", "error");
 					return;
 				}
 
-				const response = await axios.post(`http://localhost:8000/usuarios/${this.usuario.id}/actualizar_contraseña`, {
-					contraseñaActual: this.currentPassword,
-					nuevaContraseña: this.newPassword,
-				});
+				if (!this.token) {
+					Swal.fire("Error", "No estás autenticado. Inicia sesión nuevamente.", "error");
+					return;
+				}
+
+				// Enviar solicitud con el token JWT en los headers
+				const response = await axios.post(
+					`http://localhost:8000/usuarios/${this.userId}/actualizar_contraseña`,
+					{
+						contraseñaActual: this.currentPassword,
+						nuevaContraseña: this.newPassword,
+					},
+					{
+						headers: {
+							Authorization: `Bearer ${this.token}`,
+						},
+					}
+				);
 
 				Swal.fire({
 					icon: "success",
 					title: "Contraseña actualizada",
 					text: response.data.message || "La contraseña se ha actualizado correctamente.",
 				});
+
+				// Limpiar los campos después de actualizar
+				this.currentPassword = "";
+				this.newPassword = "";
 			} catch (error) {
 				console.error(error);
 				Swal.fire({
 					icon: "error",
 					title: "Error al actualizar",
-					text: error.response?.data?.detail || "No se pudo actualizar la contraseña. Por favor, inténtalo de nuevo.",
+					text: error.response?.data?.detail || "No se pudo actualizar la contraseña. Intenta de nuevo.",
 				});
 			}
 		},
@@ -77,6 +111,7 @@ export default {
 	},
 };
 </script>
+
 
 <style scoped>
 .back-button {

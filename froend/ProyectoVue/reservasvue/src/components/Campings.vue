@@ -38,77 +38,82 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode'; // Importación por defecto
 
-// Acceso al store y router
-const store = useStore();
+// Instanciar router
 const router = useRouter();
 
+// Computed para obtener el usuario decodificando el token almacenado en localStorage
+const usuario = computed(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      return jwtDecode(token); // Se espera que el token contenga el ID en "sub" y otros datos
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  }
+  return null;
+});
 
-const usuario = computed(() => store.state.usuario);
-
+// Función para volver atrás
 const volver = () => {
-	router.back();
+  router.back();
 };
 
-const Lugares = ref({})
+// Lista de lugares (campings)
+const Lugares = ref([]);
 
+// Función para obtener los campings disponibles
 const obtenerCamping = async () => {
-	try {
-		const response = await axios.get("http://127.0.0.1:8000/planes/Camping/tipo");
-		Lugares.value = response.data;
-	} catch (error) {
-		console.error("Error al obtener los lugares:", error);
-		Swal.fire({
-			icon: 'error',
-			title: 'Error',
-			text: 'No se pudieron cargar los lugares. Intenta nuevamente más tarde.',
-		});
-	}
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/planes/Camping/tipo");
+    Lugares.value = response.data;
+  } catch (error) {
+    console.error("Error al obtener los lugares:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudieron cargar los lugares. Intenta nuevamente más tarde.',
+    });
+  }
 };
 
-// Función para manejar la reserva
-const hacerReserva = async (camping) => {
-	// Verificar si el usuario ha iniciado sesión
-	if (!usuario.value) {
-		await Swal.fire({
-			icon: 'warning',
-			title: 'Inicia sesión',
-			text: 'Debes iniciar sesión para reservar un camping.',
-		});
-		return;
-	}
+// Función para reservar un camping
+const hacerReserva = (camping) => {
+  // Verificar si el usuario está autenticado (obtenido desde el token JWT)
+  if (!usuario.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Inicia sesión',
+      text: 'Debes iniciar sesión para reservar un camping.',
+    });
+    return;
+  }
+  
+  // Guardamos la selección del camping en localStorage
+  localStorage.setItem("tipoPlan", JSON.stringify(camping));
+  
+  // Redirigir al formulario de reservas
+  router.push("/reservas");
 
-	try {
-		// Enviar la información del camping al backend para procesar la reserva
-		await store.dispatch("guardarTipoPlan", camping);
-		
-		// Redirigir al formulario de reservas
-		router.push("/reservas");
-
-		// Mostrar mensaje de éxito
-		await Swal.fire({
-			icon: 'success',
-			title: 'Reserva registrada',
-			text: `Has seleccionado el camping "${camping.nombre}" para tu experiencia.`,
-		});
-	} catch (error) {
-		// Manejo de errores
-		console.error("Error al realizar la reserva:", error);
-		await Swal.fire({
-			icon: 'error',
-			title: 'Error',
-			text: 'No se pudo procesar la reserva. Intenta nuevamente más tarde.',
-		});
-	}
+  Swal.fire({
+    icon: 'success',
+    title: 'Se guardó tu selección, completa el formulario',
+    text: `Has reservado el camping "${camping.nombre}" para tu experiencia.`,
+  }).then(() => {
+    console.log(`Camping reservado: ${camping.nombre}`);
+  });
 };
 
-
-onMounted(obtenerCamping)
+onMounted(obtenerCamping);
 </script>
+
+
 
 <style scoped>
 .contpri {

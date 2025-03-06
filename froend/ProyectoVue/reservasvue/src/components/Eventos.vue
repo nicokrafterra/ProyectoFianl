@@ -35,58 +35,69 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
-const store = useStore();
 const router = useRouter();
-
-const usuario = computed(() => store.state.usuario);
 const Lugares = ref([]);
 
-// Función para manejar alertas de SweetAlert
+// Computed para obtener el usuario decodificando el token JWT
+const usuario = computed(() => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      return jwtDecode(token); // Se espera que el token tenga la información del usuario
+    } catch (error) {
+      console.error('Error al decodificar el token:', error);
+      return null;
+    }
+  }
+  return null;
+});
+
+// Función para mostrar alertas con SweetAlert
 const mostrarAlerta = (icono, titulo, texto) => {
-	Swal.fire({
-		icon: icono,
-		title: titulo,
-		text: texto,
-	});
+  Swal.fire({
+    icon: icono,
+    title: titulo,
+    text: texto,
+  });
 };
 
 const volver = () => {
-	router.back();
+  router.back();
 };
 
 // Obtener los lugares disponibles para eventos
 const obtenerLugares = async () => {
-	try {
-		const response = await axios.get("http://127.0.0.1:8000/planes/Evento/tipo");
-		Lugares.value = response.data;
-	} catch (error) {
-		console.error("Error al obtener los lugares:", error);
-		mostrarAlerta('error', 'Error', 'No se pudieron cargar los lugares. Intenta nuevamente más tarde.');
-	}
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/planes/Evento/tipo");
+    Lugares.value = response.data;
+  } catch (error) {
+    console.error("Error al obtener los lugares:", error);
+    mostrarAlerta('error', 'Error', 'No se pudieron cargar los lugares. Intenta nuevamente más tarde.');
+  }
 };
 
 // Reservar un lugar para un evento
 const reservar = (evento) => {
-	if (!usuario.value) {
-		mostrarAlerta('warning', 'Inicia sesión', 'Debes iniciar sesión para reservar un lugar.');
-		return;
-	}
+  if (!usuario.value) {
+    mostrarAlerta('warning', 'Inicia sesión', 'Debes iniciar sesión para reservar un lugar.');
+    return;
+  }
 
-	// Guardar tipo de plan seleccionado y redirigir a reservas
-	store.dispatch("guardarTipoPlan", evento);
-	router.push("/reservas");
+  // Guardar el plan seleccionado en localStorage (simulando la acción de Vuex)
+  localStorage.setItem("tipoPlan", JSON.stringify(evento));
+  router.push("/reservas");
 
-	mostrarAlerta('success', 'Lugar reservado', `Has seleccionado el lugar "${evento.nombre}" para tu evento.`);
+  mostrarAlerta('success', 'Lugar reservado', `Has seleccionado el lugar "${evento.nombre}" para tu evento.`);
 };
 
-// Ejecutar la función para obtener lugares al montar el componente
 onMounted(obtenerLugares);
 </script>
+
 
 <style scoped>
 /* Contenedor principal */

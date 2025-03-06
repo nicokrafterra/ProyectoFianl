@@ -14,50 +14,82 @@
 	</div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { mapState } from 'vuex';
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
+import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'vue-router';
 
+const newEmail = ref('');
+const userId = ref(null);
+const router = useRouter(); // Necesario para navegar en <script setup>
 
-export default {
-	data() {
-		return {
-			newEmail: '',
-		};
-	},
-	computed: {
-    ...mapState(['usuario']),
-  },
-	methods: {
-		async updateEmail() {
-			try {
-				const userId = this.usuario.id
-				await axios.put(`http://localhost:8000/usuarios/${userId}/correo`, {
-					nuevo_correo: this.newEmail,
-				});;
-				Swal.fire({
-					title: 'EXito!',
-					text: 'Correo electrónico actualizado exitosamente',
-					icon: 'success',
-					confirmButtonText: 'Aceptar'
-				});
-			} catch (error) {
-				console.error(error);
-				Swal.fire({
-					title: 'Error!',
-					text: 'Error al actualizar el correo electrónico',
-					icon: 'error',
-					confirmButtonText: 'Aceptar'
-				});
+// Método para extraer el user_id del token
+function obtenerUserId() {
+	const token = localStorage.getItem('token');
+	if (token) {
+		try {
+			const decodedToken = jwtDecode(token);
+			userId.value = decodedToken.sub; // "sub" es el ID del usuario en JWT
+		} catch (error) {
+			console.error('Error al decodificar el token:', error);
+			userId.value = null;
+		}
+	}
+}
+
+// Método para actualizar el correo electrónico
+async function updateEmail() {
+	if (!userId.value) {
+		Swal.fire({
+			title: 'Error',
+			text: 'No se pudo obtener la información del usuario.',
+			icon: 'error',
+			confirmButtonText: 'Aceptar',
+		});
+		return;
+	}
+
+	try {
+		await axios.put(
+			`http://localhost:8000/usuarios/${userId.value}/correo`,
+			{ nuevo_correo: newEmail.value },
+			{
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem('token')}`,
+				},
 			}
-		},
-		volver() {
-			this.$router.back();
-		},
-	},
-};
+		);
+
+		Swal.fire({
+			title: '¡Éxito!',
+			text: 'Correo electrónico actualizado exitosamente',
+			icon: 'success',
+			confirmButtonText: 'Aceptar',
+		});
+	} catch (error) {
+		console.error(error);
+		Swal.fire({
+			title: 'Error',
+			text: error.response?.data?.detail || 'Error al actualizar el correo electrónico',
+			icon: 'error',
+			confirmButtonText: 'Aceptar',
+		});
+	}
+}
+
+// Método para volver a la página anterior
+function volver() {
+	router.back(); // Ahora usa `router` en lugar de `this.$router`
+}
+
+// Llamar a obtenerUserId cuando el componente se monte
+onMounted(() => {
+	obtenerUserId();
+});
 </script>
+
 
 <style scoped>
 .back-button {

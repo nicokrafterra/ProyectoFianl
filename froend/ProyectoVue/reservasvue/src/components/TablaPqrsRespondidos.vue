@@ -24,38 +24,62 @@
 	</div>
 </template>
 
-<script>
-import axios from "axios";
-import { mapState } from 'vuex';
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 
-export default {
-	computed: {
-		...mapState(['usuario']),
-	},
-	data() {
-		return {
-			pqrs: [],
-		};
-	},
-	created() {
-		this.obtenerPqrsRespondidos();
-	},
-	methods: {
-		async obtenerPqrsRespondidos() {
-			try {
-				const usuarioId = this.usuario.id;
-				const response = await axios.get(`http://localhost:8000/usuarios/${usuarioId}/pqrs/respondidos`);
-				this.pqrs = response.data;
-			} catch (error) {
-				console.error("Error al obtener PQRs respondidos:", error);
-			}
-		},
-		volver() {
-			this.$router.back();
-		},
-	},
+const router = useRouter();
+const pqrs = ref([]);
+const usuarioId = ref(null);
+
+// 🔹 Obtener el ID de usuario desde el token JWT
+const obtenerUsuarioDesdeJWT = () => {
+	const token = localStorage.getItem('token');
+	if (token) {
+		try {
+			const decodedToken = jwtDecode(token);
+			usuarioId.value = decodedToken.sub; // Ajusta esto según cómo envía el backend el ID del usuario en el token
+		} catch (error) {
+			console.error('Error al decodificar el token:', error);
+			usuarioId.value = null;
+		}
+	}
+};
+
+// 🔹 Obtener PQRs respondidos con autenticación JWT
+const obtenerPqrsRespondidos = async () => {
+	if (!usuarioId.value) {
+		console.error("No se pudo obtener el ID del usuario desde el token.");
+		return;
+	}
+
+	try {
+		const token = localStorage.getItem('token');
+		const response = await axios.get(`http://localhost:8000/usuarios/${usuarioId.value}/pqrs/respondidos`, {
+			headers: {
+				Authorization: `Bearer ${token}`, // 🔹 Se incluye el token JWT en la solicitud
+			},
+		});
+		pqrs.value = response.data;
+	} catch (error) {
+		console.error("Error al obtener PQRs respondidos:", error.response ? error.response.data : error.message);
+	}
+};
+
+// 🔹 Ejecutar la función al montar el componente
+onMounted(() => {
+	obtenerUsuarioDesdeJWT();
+	obtenerPqrsRespondidos();
+});
+
+// 🔹 Función para volver atrás
+const volver = () => {
+	router.go(-1);
 };
 </script>
+
 
 <style scoped>
 .contpri {

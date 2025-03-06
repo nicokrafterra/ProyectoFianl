@@ -38,16 +38,37 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
+import { jwtDecode } from 'jwt-decode';
 
 const store = useStore();
-const reservas = ref([]);
 const router = useRouter();
-const usuario = computed(() => store.state.usuario);
+const reservas = ref([]);
+
+// Computed que obtiene el ID del usuario:
+// Primero, intenta usar el usuario almacenado en Vuex.
+// Si no existe, intenta decodificar el token JWT y usa el campo "sub".
+const usuarioId = computed(() => {
+  if (store.state.usuario && store.state.usuario.id) {
+    return store.state.usuario.id;
+  } else {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        return decoded.sub; // Asegúrate de que en el token se usa "sub" para el id
+      } catch (error) {
+        console.error('Error al decodificar el token:', error);
+        return null;
+      }
+    }
+    return null;
+  }
+});
 
 const volver = () => {
 	router.back();
@@ -55,25 +76,40 @@ const volver = () => {
 
 const obtenerReservas = async () => {
 	try {
-		const response = await axios.get(`http://localhost:8000/reservas/${usuario.value.id}/user`);
+		const token = localStorage.getItem('token');
+		if (!token) {
+			throw new Error("No hay token disponible, inicia sesión.");
+		}
+		if (!usuarioId.value) {
+			throw new Error("No se pudo obtener el ID del usuario.");
+		}
+
+		const response = await axios.get(`http://localhost:8000/reservas/${usuarioId.value}/user`, {
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		});
 		reservas.value = response.data;
 	} catch (error) {
-		console.error("Error al obtener las reservas:", error);
+		console.error("Error al obtener las reservas:", error.response ? error.response.data : error.message);
 	}
 };
 
-
 const pagarReserva = async (id) => {
 	try {
-		const response = await axios.post(`http://localhost:8000/reservas/${id}/pagar`);
+		const token = localStorage.getItem('token');
+		if (!token) throw new Error("No hay token disponible, inicia sesión.");
+		const response = await axios.post(`http://localhost:8000/reservas/${id}/pagar`, null, {
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		});
 		if (response.status === 200) {
 			const updatedReserva = response.data;
 			const index = reservas.value.findIndex(reserva => reserva.id === id);
 			if (index !== -1) {
 				reservas.value[index] = updatedReserva;
 			}
-
-
 			Swal.fire({
 				icon: 'success',
 				title: 'Reserva pagada',
@@ -82,23 +118,26 @@ const pagarReserva = async (id) => {
 			});
 		}
 	} catch (error) {
-
 		Swal.fire({
 			icon: 'error',
 			title: 'Error',
 			text: 'Hubo un problema al intentar pagar la reserva.',
 			confirmButtonText: 'Aceptar'
 		});
-		console.error("Error al pagar la reserva:", error);
+		console.error("Error al pagar la reserva:", error.response ? error.response.data : error.message);
 	}
 };
 
-
 const eliminarReserva = async (id) => {
 	try {
-		const response = await axios.delete(`http://localhost:8000/reservas/${id}`);
+		const token = localStorage.getItem('token');
+		if (!token) throw new Error("No hay token disponible, inicia sesión.");
+		const response = await axios.delete(`http://localhost:8000/reservas/${id}`, {
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		});
 		if (response.status === 200) {
-
 			reservas.value = reservas.value.filter(reserva => reserva.id !== id);
 			Swal.fire({
 				icon: 'success',
@@ -114,12 +153,14 @@ const eliminarReserva = async (id) => {
 			text: 'Hubo un problema al intentar eliminar la reserva.',
 			confirmButtonText: 'Aceptar'
 		});
-		console.error("Error al eliminar la reserva:", error);
+		console.error("Error al eliminar la reserva:", error.response ? error.response.data : error.message);
 	}
 };
 
 onMounted(obtenerReservas);
 </script>
+
+
 
 <style scoped>
 .reservas-container {

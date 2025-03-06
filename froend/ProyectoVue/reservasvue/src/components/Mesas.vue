@@ -37,66 +37,95 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
-// Acceso al store y router
-const store = useStore();
 const router = useRouter();
 
-// Computed para obtener el usuario
-const usuario = computed(() => store.state.usuario);
+// Obtenemos el usuario decodificando el token almacenado en localStorage
+const usuario = computed(() => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      return jwtDecode(token);
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  }
+  return null;
+});
 
-// Función para volver a la página anterior
-const volver = () => {
-	router.back();
+// El ID del usuario se obtiene de la propiedad "sub" del token
+const userId = computed(() => usuario.value ? usuario.value.sub : null);
+
+// Variable para almacenar el plan seleccionado (simulando lo que podría estar en Vuex)
+const tipoPlan = ref(null);
+
+// Variable para almacenar las mesas disponibles
+const Mesas = ref([]);
+
+// Función para obtener el plan seleccionado desde localStorage
+const obtenerTipoPlan = () => {
+  const planGuardado = localStorage.getItem('tipoPlan');
+  if (planGuardado) {
+    tipoPlan.value = JSON.parse(planGuardado);
+  }
 };
 
-const Mesas = ref({})
-
+// Función para obtener las mesas disponibles
 const obtenerMesas = async () => {
-	try {
-		const response = await axios.get("http://127.0.0.1:8000/planes/Mesa/tipo");
-		Mesas.value = response.data;
-	} catch (error) {
-		console.error("Error al obtener los lugares:", error);
-		Swal.fire({
-			icon: 'error',
-			title: 'Error',
-			text: 'No se pudieron cargar los lugares. Intenta nuevamente más tarde.',
-		});
-	}
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/planes/Mesa/tipo");
+    Mesas.value = response.data;
+  } catch (error) {
+    console.error("Error al obtener los lugares:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudieron cargar los lugares. Intenta nuevamente más tarde.',
+    });
+  }
 };
 
 // Función para manejar la selección de una mesa
 const seleccionarMesa = (mesa) => {
-
-	if (!usuario.value) {
-		Swal.fire({
-			icon: 'warning',
-			title: 'Inicia sesión',
-			text: 'Debes iniciar sesión para reservar un lugar.',
-		});
-		return;
-	}
-
-	store.dispatch("guardarTipoPlan", mesa);
-	router.push("/reservas");
-
-	Swal.fire({
-		icon: 'success',
-		title: 'Se guardo tu seleccion, completa el formulario',
-		text: `Has reservado el lugar "${mesa.nombre}" para tu evento.`,
-	}).then(() => {
-		// Aquí puedes agregar lógica para guardar la reserva en el backend
-		console.log(`Lugar reservado: ${mesa.nombre}`);
-	});
+  if (!userId.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Inicia sesión',
+      text: 'Debes iniciar sesión para reservar un lugar.',
+    });
+    return;
+  }
+  
+  // Guardar la selección del plan en localStorage
+  localStorage.setItem("tipoPlan", JSON.stringify(mesa));
+  router.push("/reservas");
+  
+  Swal.fire({
+    icon: 'success',
+    title: 'Se guardó tu selección, completa el formulario',
+    text: `Has reservado el lugar "${mesa.nombre}" para tu evento.`,
+  }).then(() => {
+    console.log(`Lugar reservado: ${mesa.nombre}`);
+  });
 };
 
-onMounted(obtenerMesas)
+// Función para volver a la página anterior
+const volver = () => {
+  router.back();
+};
+
+onMounted(() => {
+  obtenerMesas();
+  obtenerTipoPlan();
+});
 </script>
+
+
 
 <style scoped>
 .contpri {

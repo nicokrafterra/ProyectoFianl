@@ -19,24 +19,46 @@ from passlib.context import CryptContext
 from modelo import Plan
 from schemas import PlanCreate, PlanResponse
 from datetime import date
-
+from auth import get_current_user,crear_token_jwt,verificar_token
 
 app = FastAPI()
-
-
+  
+SECRET_KEY = "123456789"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 app.mount("/imagenes", StaticFiles(directory="imagenes"), name="imagenes")
 
+
+
+
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  
+    allow_origins=["http://localhost:5173"],  # 🔹 Permitir tu frontend (Vite usa este puerto)
     allow_credentials=True,
-    allow_methods=["*"],  
-    allow_headers=["*"],  
+    allow_methods=["*"],  # 🔹 Permitir todos los métodos (GET, POST, etc.)
+    allow_headers=["*"],  # 🔹 Permitir todos los headers
 )
 
 base.metadata.create_all(bind=crear)
+
+
+@app.post("/token", response_model=dict)
+async def generar_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.correoElectronico == form_data.username).first()
+    if not usuario or not pwd_context.verify(form_data.password, usuario.contraseñaUsuario):
+        raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = crear_token_jwt(data={"sub": str(usuario.id)}, expires_delta=access_token_expires)
+
+    return {"access_token": access_token, "token_type": "bearer"}
+
 
 
 @app.get("/usuarios/")
@@ -166,26 +188,25 @@ async def eliminar_reserva(reserva_id: int, db: Session = Depends(get_db)):
 
     return {"detail": "Reserva eliminada con éxito"}
 
+@app.get("/usuarios/me")
+async def obtener_usuario_actual(usuario: Usuario = Depends(get_current_user)):
+    return usuario
 
 @app.post("/login")
 async def login(user: Login, db: Session = Depends(get_db)):
     db_user = db.query(Usuario).filter(Usuario.correoElectronico == user.nombre_usuario).first()
     
-    if db_user is None:
-        raise HTTPException(status_code=400, detail="Usuario no existe")
+    if db_user is None or not pwd_context.verify(user.password, db_user.contraseñaUsuario):
+        raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
 
-    if not bcrypt.checkpw(user.password.encode('utf-8'), db_user.contraseñaUsuario.encode('utf-8')):
-        raise HTTPException(status_code=400, detail="Contraseña incorrecta")
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    return {
-        "mensaje": "Inicio de sesión Ok",
-        "nombre": db_user.nombre,
-        "correoElectronico": db_user.correoElectronico,
-        "numeroCelular":db_user.numeroCelular,
-        "esAdmin":db_user.esAdmin,
-        "id":db_user.id,
-        "imagen":db_user.imagen,
-    }
+    # Aquí pasamos el objeto `db_user`, no un diccionario
+    access_token = crear_token_jwt(usuario=db_user, expires_delta=access_token_expires)
+
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
 
 @app.post("/pqr/", response_model=PQRS)
 async def crear_pqr(pqr: PQRS, db: Session = Depends(get_db)):

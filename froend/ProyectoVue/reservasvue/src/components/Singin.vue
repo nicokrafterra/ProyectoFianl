@@ -7,13 +7,9 @@
 				<div v-if="loginError" style="color: red">{{ loginError }}</div>
 
 				<input class="input" type="password" v-model="password" placeholder="Password" required />
-				<div v-if="loginPasswordError" style="color: red">
-					{{ loginPasswordError }}
-				</div>
+				<div v-if="loginPasswordError" style="color: red">{{ loginPasswordError }}</div>
 
-				<button class="btn" type="submit" @click.prevent="handleLogin">
-					Inicia Sesión
-				</button>
+				<button class="btn" type="submit" @click.prevent="handleLogin">Inicia Sesión</button>
 				<p class="switch">
 					¿Aún no tienes cuenta?
 					<RouterLink to="/Registrar" class="signup_tog">Regístrate</RouterLink>
@@ -27,6 +23,8 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 import { mapActions } from "vuex";
+import { jwtDecode } from "jwt-decode";
+import api from "@/axiosConfig";
 
 export default {
 	data() {
@@ -43,51 +41,104 @@ export default {
 			this.loginPasswordError = "";
 		},
 		...mapActions(["loginUsuario"]),
+
 		async handleLogin() {
 			this.clearErrors();
+
+			if (!this.email) {
+				this.loginError = "El email es obligatorio.";
+				return;
+			}
+			if (!this.password) {
+				this.loginPasswordError = "La contraseña es obligatoria.";
+				return;
+			}
+
 			try {
-				const response = await axios.post("http://localhost:8000/login", {
+				const response = await api.post("/login", {
 					nombre_usuario: this.email,
 					password: this.password,
 				});
 
-				this.loginUsuario(response.data);
+				if (response.status === 200) {
+					const token = response.data.access_token;
 
-				const esAdmin = response.data.esAdmin;
+					if (typeof token === "string" && token.trim().length > 0) {
+						localStorage.setItem("token", token);
+						this.loginUsuario(token);
 
-				Swal.fire({
-					icon: "success",
-					title: "¡Bienvenido!",
-					text: "Tu inicio de sesión ha sido exitoso. Redirigiendo...",
-					background: "#e0f7fa",
-					color: "#004d40",
-					showConfirmButton: false,
-					timer: 3000,
-					customClass: {
-						popup: "my-swal-popup",
-					},
-				});
+						// 🔹 Nueva solicitud a /protegido después del login exitoso
+						this.verificarAccesoProtegido();
 
-				setTimeout(() => {
-					if (esAdmin) {
-						this.$router.push("/VistaAd");
+						Swal.fire({
+							icon: "success",
+							title: "¡Bienvenido!",
+							text: "Tu inicio de sesión ha sido exitoso. Redirigiendo...",
+							background: "#e0f7fa",
+							color: "#004d40",
+							showConfirmButton: false,
+							timer: 3000,
+						});
+
+						setTimeout(() => {
+							if (this.email.endsWith(".ad")) {
+								this.$router.push("/VistaAd");
+							} else {
+								this.$router.push("/index");
+							}
+						}, 1000);
 					} else {
-						this.$router.push("/index");
+						this.loginError = "El token proporcionado no es válido.";
 					}
-				}, 1000);
+				}
 			} catch (error) {
+				if (error.response) {
+					if (error.response.status === 401) {
+						this.loginError = "Credenciales incorrectas. Intenta de nuevo.";
+					} else if (error.response.status === 400) {
+						this.loginError = "Solicitud incorrecta. Verifica los datos.";
+					} else {
+						this.loginError = "Error al iniciar sesión. Inténtalo más tarde.";
+					}
+				} else {
+					this.loginError = "No se pudo conectar con el servidor.", error;
+				}
+
 				Swal.fire({
 					icon: "error",
 					title: "Error al iniciar sesión",
-					text: "Verifica tus credenciales e intenta nuevamente.",
+					text: this.loginError,
 					background: "#ffebee",
 					color: "#b71c1c",
 				});
 			}
 		},
+
+		// 🔹 Nueva función para verificar acceso a ruta protegida
+		async verificarAccesoProtegido() {
+			try {
+				const token = localStorage.getItem("token");
+				if (!token) {
+					console.warn("⚠️ No hay token disponible.");
+					return;
+				}
+
+				const response = await axios.get("http://localhost:8000/protegido", {
+					headers: {
+						"Authorization": `Bearer ${token}`,
+					},
+				});
+
+				console.log("✅ Acceso a datos protegidos:", response.data);
+			} catch (error) {
+				console.error("❌ Error al acceder a la ruta protegida:", error);
+			}
+		},
 	},
 };
 </script>
+
+
 
 <style scoped>
 /* Importación de estilos proporcionados */

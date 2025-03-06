@@ -1,22 +1,46 @@
-import { createStore } from 'vuex';
+import { createStore } from "vuex";
+import { jwtDecode } from "jwt-decode"; // Importación con llaves
+
+const storedToken = localStorage.getItem("token");
+
+let usuario = null;
+if (storedToken) {
+  try {
+    const payload = jwtDecode(storedToken);
+
+    // Verificar si el token ha expirado
+    if (payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem("token"); // Eliminar token expirado
+    } else {
+      usuario = payload; // Restaurar usuario si el token es válido
+    }
+  } catch (error) {
+    console.error("Error al decodificar el token:", error);
+    localStorage.removeItem("token"); // Si hay error, eliminar el token inválido
+  }
+}
 
 const store = createStore({
   state: {
-    usuario: null, // Estado para almacenar la información del usuario
+    usuario: null, // Datos del usuario extraídos del token
+    token: null, // Token JWT
     tipoPlan: null,
   },
   mutations: {
-    actualizarFoto(state, nuevaRuta) {
-      if (state.usuario) {
-          state.usuario.imagen = nuevaRuta;
-      }
-    },
     setUsuario(state, usuario) {
       state.usuario = usuario;
     },
-    clearUsuario(state) {
+    setToken(state, token) {
+      state.token = token;
+    },
+    clearAuth(state) {
       state.usuario = null;
-      
+      state.token = null;
+    },
+    actualizarFoto(state, nuevaRuta) {
+      if (state.usuario) {
+        state.usuario.imagen = nuevaRuta;
+      }
     },
     setTipoPlan(state, plan) {
       state.tipoPlan = plan;
@@ -26,26 +50,37 @@ const store = createStore({
     },
   },
   actions: {
-    registerUsuario({ commit }, usuario) {
-      commit('setUsuario', usuario); // Guardar el usuario en el estado
+    async loginUsuario({ commit }, token) {
+      commit("setToken", token);
+      const payload = jwtDecode(token);
+      commit("setUsuario", payload);
+      localStorage.setItem("token", token); // Guardar token en localStorage
     },
-    loginUsuario({ commit }, usuario) {
-      commit('setUsuario', usuario); // Guardar el usuario en el estado
+    cargarToken({ commit }) {
+      const storedToken = localStorage.getItem("token");
+      if (storedToken) {
+        const payload = jwtDecode(storedToken);
+        commit("setToken", storedToken);
+        commit("setUsuario", payload);
+      }
     },
     logoutUsuario({ commit }) {
-      commit('clearUsuario'); // Limpiar el estado del usuario
+      commit("clearAuth");
+      localStorage.removeItem("token");
+      location.reload(); // Recarga la página
     },
     guardarTipoPlan({ commit }, plan) {
       commit("setTipoPlan", plan);
     },
     resetTipoPlan({ commit }) {
-      commit("RESET_TIPO_PLAN"); // Llama a la mutación que resetea el tipo de plan
+      commit("RESET_TIPO_PLAN");
     },
   },
   getters: {
-    usuarioId: (state) => state.usuario?.id, // Retorna el ID del usuario si existe
-    esAdmin: (state) => state.usuario?.esAdmin, // Getter opcional para verificar si el usuario es admin
+    usuarioId: (state) => state.usuario?.id, // ID del usuario
+    esAdmin: (state) => state.usuario?.esAdmin, // Si es administrador
     obtenerTipoPlan: (state) => state.tipoPlan,
+    isAuthenticated: (state) => !!state.token, // Verifica si hay sesión activa
   },
 });
 

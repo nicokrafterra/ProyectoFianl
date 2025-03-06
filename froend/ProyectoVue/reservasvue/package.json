@@ -9,13 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "jwt-decode": "^4.0.0",
     "server": "^0.0.3",
     "vue": "^3.4.29",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
-    "vite": "^5.3.1",
+    "vite": "^6.2.0",
     "vite-plugin-vue-devtools": "^7.3.1"
   }
 }

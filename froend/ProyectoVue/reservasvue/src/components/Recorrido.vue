@@ -35,25 +35,36 @@
     </section>
   </div>
 </template> 	
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
-const store = useStore();
 const router = useRouter();
 
-const usuario = computed(() => store.state.usuario);
+// Obtenemos el usuario decodificando el token almacenado en localStorage
+const usuario = computed(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      return jwtDecode(token); // Se espera que el token contenga el ID en "sub" u otra propiedad
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  }
+  return null;
+});
 
 const volver = () => {
   router.back();
 };
 
-const Lugares = ref([]); // Cambié el tipo a un array, ya que es un listado de recorridos
+const Lugares = ref([]); // Listado de recorridos
 
+// Función para obtener los recorridos disponibles
 const obtenerRecorrido = async () => {
   try {
     const response = await axios.get("http://127.0.0.1:8000/planes/Recorrido/tipo");
@@ -68,6 +79,7 @@ const obtenerRecorrido = async () => {
   }
 };
 
+// Función para reservar un recorrido
 const reservarRecorrido = (recorrido) => {
   if (!usuario.value) {
     Swal.fire({
@@ -77,8 +89,9 @@ const reservarRecorrido = (recorrido) => {
     });
     return;
   }
-
-  store.dispatch("guardarTipoPlan", recorrido);
+  
+  // Guardamos la selección del plan en localStorage
+  localStorage.setItem("tipoPlan", JSON.stringify(recorrido));
   router.push("/reservas");
 
   Swal.fire({
@@ -92,6 +105,7 @@ const reservarRecorrido = (recorrido) => {
 
 onMounted(obtenerRecorrido);
 </script>
+
 
 
 <style scoped>

@@ -1,77 +1,66 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useStore } from 'vuex';
-import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';
 
 
 const isHidden = ref(true);
 const isFading = ref(false);
 const Menu = ref(null);
 
-
 const store = useStore();
 const router = useRouter();
 
 const usuario = computed(() => store.state.usuario);
-
 const imagenPorDefecto = ref("../assets/IMG/foto.png");
 
-const img = ref(usuario.value.imagen)
-
-const imagenPerfil = ref(`http://localhost:8000/${img.value}`);
-
-
+const imagenPerfil = computed(() => {
+    return usuario.value && usuario.value.imagen 
+        ? `http://localhost:8000/${usuario.value.imagen}`
+        : imagenPorDefecto.value;
+});
 
 const toggleDropdown = () => {
-	isHidden.value = !isHidden.value;
-	isFading.value = !isHidden.value;
+    isHidden.value = !isHidden.value;
+    isFading.value = !isHidden.value;
 };
 
 const handleClickOutside = (event) => {
-	if (Menu.value && !Menu.value.contains(event.target) && !event.target.classList.contains('perfil')) {
-		isHidden.value = true;
-		isFading.value = true;
-	}
+    if (Menu.value && !Menu.value.contains(event.target) && !event.target.classList.contains('perfil')) {
+        isHidden.value = true;
+        isFading.value = true;
+    }
 };
 
 onMounted(() => {
-	document.addEventListener('click', handleClickOutside);
-	const usuarioGuardado = localStorage.getItem("usuario");
-	if (usuarioGuardado) {
-		store.commit("setUsuario", JSON.parse(usuarioGuardado));
-	}
+    document.addEventListener('click', handleClickOutside);
 
-	store.watch(
-		(state) => state.usuario,
-		(nuevoUsuario) => {
-			localStorage.setItem("usuario", JSON.stringify(nuevoUsuario));
-		}
+    // Obtener el token del localStorage
+    const token = localStorage.getItem("token");
 
-	);
-	imagenPerfil
+    if (token) {
+        try {
+            const decoded = jwtDecode(token);
+            store.commit("setUsuario", decoded);
+        } catch (error) {
+            console.error("Error al decodificar el token:", error);
+            localStorage.removeItem("token"); // Eliminar token corrupto
+            router.push("/Iniciar"); // Redirigir al login si hay un error
+        }
+    }
 });
-
-
-
 
 onBeforeUnmount(() => {
-	document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener('click', handleClickOutside);
 });
 </script>
+
 
 <template>
 	<header>
 		<div class="A-logo">
-			<svg width="1103" height="996" viewBox="0 0 1103 996" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<path fill-rule="evenodd" clip-rule="evenodd"
-					d="M410.988 255.56L0 995.337H189.802L505.141 427.427L410.988 255.56ZM1102.94 995.337L647.119 170.373L551.471 0L457.317 170.373L551.471 340.746L711.79 629.718H498.683L405.461 786.972H799.034L914.634 995.337H1102.94Z"
-					fill="#FAFBFC" />
-				<path fill-rule="evenodd" clip-rule="evenodd"
-					d="M410.988 255.56L0 995.337H189.802L505.141 427.427L410.988 255.56ZM1102.94 995.337L647.119 170.373L551.471 0L457.317 170.373L551.471 340.746L711.79 629.718H498.683L405.461 786.972H799.034L914.634 995.337H1102.94Z"
-					fill="#FAFBFC" />
-			</svg>
-			<p></p>
+			<img src="../assets/IMG/LogoFinal.png" alt="">
 		</div>
 		<span class="navegar__Usuario">
 			<router-link class="icon-p" to="/pqr">
@@ -87,8 +76,8 @@ onBeforeUnmount(() => {
 
 		<div class="Menu-desple" :class="{ hide: isHidden, 'Menu-desple-gable': isFading }" ref="Menu">
 			<div class="Menu__group">
-				<div class="nombre-usuario">{{ usuario.nombre }}</div>
-				<div class="email">{{ usuario.correoElectronico }}</div>
+				<div class="nombre-usuario">{{ usuario?.nombre }}</div>
+				<div class="email">{{ usuario?.correoElectronico }}</div>
 			</div>
 			<hr class="divider" />
 			<nav>
@@ -413,11 +402,9 @@ onBeforeUnmount(() => {
 					<p class="title-footer">Información de Contacto</p>
 					<ul>
 						<li>
-							Dirección: 71 Pennington Lane Vernon Rockville, CT
-							06066
+Kilometro .....
 						</li>
-						<li>Teléfono: 123-456-7890</li>
-						<li>Fax: 55555300</li>
+						<li>Teléfono: 313-430-9651</li>
 						<li>EmaiL: Reservas@support.com</li>
 					</ul>
 				</div>
@@ -431,7 +418,7 @@ onBeforeUnmount(() => {
 
 
 :root {
-	--primary: #f77235;
+	--primary: #fe8248;
 	--text: #0F192D;
 	--text-gray: #5A678C;
 	--gray: #c0bcff;
@@ -471,10 +458,13 @@ header {
 
 .navegar__Usuario>.icon:hover {
 	transform: scale(1.1);
+	filter: brightness(0) saturate(100%) invert(24%) sepia(96%) saturate(3748%) hue-rotate(4deg) brightness(99%) contrast(108%);
 }
+
 
 .navegar__Usuario>.icon-p:hover {
 	transform: scale(1.3);
+	filter: brightness(0) saturate(100%) invert(24%) sepia(96%) saturate(3748%) hue-rotate(4deg) brightness(99%) contrast(108%);
 }
 
 .nombre-usuario {
@@ -501,6 +491,7 @@ header {
 .perfil:hover {
 	transform: scale(1.1);
 	transition: all 0.4s ease-in-out;
+	border: 3.5px solid #fe2d04;
 }
 
 .email {

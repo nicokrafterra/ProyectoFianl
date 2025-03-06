@@ -15,26 +15,36 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { jwtDecode } from 'jwt-decode';
 
 const router = useRouter();
-const store = useStore();
 const imagenInput = ref(null);
+const userId = ref(null); // Se extraerá desde el token JWT
 
-const volver = () => {
-	router.back();
-};
+// Función para obtener el user_id desde el token JWT
+function obtenerUserId() {
+	const token = localStorage.getItem('token');
+	if (token) {
+		try {
+			const decodedToken = jwtDecode(token);
+			userId.value = decodedToken.sub; // "sub" suele ser el ID del usuario
+		} catch (error) {
+			console.error('Error al decodificar el token:', error);
+			userId.value = null;
+		}
+	}
+}
 
-const usuario = computed(() => store.state.usuario);
-
+// Seleccionar imagen
 const seleccionarImagen = () => {
-	imagenInput.value.click(); // Abrir el selector de archivos
+	imagenInput.value.click();
 };
 
+// Subir imagen de perfil
 const cambiarFoto = async (event) => {
 	const archivo = event.target.files[0];
 	if (!archivo) return;
@@ -43,52 +53,88 @@ const cambiarFoto = async (event) => {
 	formData.append("file", archivo);
 
 	try {
-		const response = await axios.put(`http://localhost:8000/usuarios/${usuario.value.id}/actualizar-foto`, formData, {
-			headers: { "Content-Type": "multipart/form-data" },
-		});
+		const response = await axios.put(
+			`http://localhost:8000/usuarios/${userId.value}/actualizar-foto`,
+			formData,
+			{
+				headers: {
+					"Content-Type": "multipart/form-data",
+					Authorization: `Bearer ${localStorage.getItem('token')}`, // Token en los headers
+				},
+			}
+		);
+
 		Swal.fire({
 			icon: 'success',
 			title: 'Imagen actualizada',
 			text: 'Tu foto de perfil se ha actualizado correctamente.',
 		});
 
-		const nuevaRuta = response.data.ruta; 
-		store.commit('actualizarFoto', nuevaRuta); 
-
 	} catch (error) {
 		console.error("Error al subir la imagen:", error);
 		Swal.fire({
 			icon: 'error',
 			title: 'Error',
-			text: 'No se pudo actualizar la foto de perfil.',
+			text: error.response?.data?.detail || 'No se pudo actualizar la foto de perfil.',
 		});
 	}
 };
 
-
+// Eliminar cuenta
 const eliminarCuenta = async () => {
-	try {
-		await axios.delete(`http://localhost:8000/usuarios/${usuario.value.id}`);
-		store.commit('logoutUsuario');
-		Swal.fire({
-			icon: 'success',
-			title: 'Cuenta eliminada exitosamente',
-			text: 'Redirigiendo...',
-			timer: 2000,
-			showConfirmButton: false,
-		}).then(() => {
-			router.push('/');
-		});
-	} catch (error) {
-		console.error("Error al eliminar la cuenta:", error);
-		Swal.fire({
-			icon: 'error',
-			title: 'Error',
-			text: 'No se pudo eliminar la cuenta.',
-		});
-	}
+	Swal.fire({
+		title: '¿Estás seguro?',
+		text: 'Esta acción no se puede deshacer.',
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonColor: '#d33',
+		cancelButtonColor: '#3085d6',
+		confirmButtonText: 'Sí, eliminar',
+		cancelButtonText: 'Cancelar',
+	}).then(async (result) => {
+		if (result.isConfirmed) {
+			try {
+				await axios.delete(`http://localhost:8000/usuarios/${userId.value}`, {
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('token')}`,
+					},
+				});
+
+				// Eliminar el token y redirigir al login
+				localStorage.removeItem('token');
+
+				Swal.fire({
+					icon: 'success',
+					title: 'Cuenta eliminada',
+					text: 'Tu cuenta ha sido eliminada con éxito.',
+					timer: 2000,
+					showConfirmButton: false,
+				}).then(() => {
+					router.push('/login');
+				});
+
+			} catch (error) {
+				console.error("Error al eliminar la cuenta:", error);
+				Swal.fire({
+					icon: 'error',
+					title: 'Error',
+					text: error.response?.data?.detail || 'No se pudo eliminar la cuenta.',
+				});
+			}
+		}
+	});
 };
+
+const volver = () => {
+	router.go(-1); // Esto regresa a la página anterior en el historial
+};
+
+// Obtener el userId cuando el componente se monta
+onMounted(() => {
+	obtenerUserId();
+});
 </script>
+
 
 <style scoped>
 .back-button {

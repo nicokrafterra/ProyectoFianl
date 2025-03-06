@@ -39,38 +39,58 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';// Importación correcta
 import Swal from 'sweetalert2';
 
-const store = useStore();
 const router = useRouter();
-
-const usuario = computed(() => store.state.usuario);
-
-const tipoPlan = computed(() => store.getters.obtenerTipoPlan);
-
 const fecha = ref('');
 const tipo_Reserva = ref('');
 const tipo_Plan = ref('');
 const minFecha = ref('');
+const usuarioId = ref(null);
+const tipoPlan = ref(null);
 
-// Dentro de setup()
+// 🔹 Obtener el ID de usuario desde el token JWT usando "sub"
+const obtenerUsuarioDesdeJWT = () => {
+	const token = localStorage.getItem('token');
+	if (token) {
+		try {
+			const decodedToken = jwtDecode(token);
+			// Usa "sub" (como se definió en el token) en lugar de "user_id"
+			usuarioId.value = decodedToken.sub;
+			if (!usuarioId.value) {
+				console.error('El token no contiene "sub".');
+			}
+		} catch (error) {
+			console.error('Error al decodificar el token:', error);
+			usuarioId.value = null;
+		}
+	}
+};
+
+// 🔹 Obtener el tipo de plan desde el almacenamiento local (simulando Vuex)
+const obtenerTipoPlan = () => {
+	const planGuardado = localStorage.getItem('tipoPlan');
+	if (planGuardado) {
+		tipoPlan.value = JSON.parse(planGuardado);
+	}
+};
+
+// 🔹 Establecer la fecha mínima (10:00 AM del día actual)
 minFecha.value = (() => {
-    // Crea una nueva fecha con cualquier fecha que se pase, pero establece la hora a las 10:00 AM
-    const ahora = new Date();
-    // Establecer la fecha actual (sin importar la hora) a las 10 AM
-    const fechaMinima = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 10, 0, 0);
-    return fechaMinima.toISOString().slice(0, 16); // Retorna la fecha con hora mínima a las 10 AM
+	const ahora = new Date();
+	const fechaMinima = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 10, 0, 0);
+	return fechaMinima.toISOString().slice(0, 16);
 })();
 
-
+// 🔹 Función para volver a la pantalla principal
 const volver = () => {
 	router.push('/index');
 };
 
-
+// 🔹 Computed para mostrar la descripción del tipo de reserva
 const descripcionReserva = computed(() => {
 	if (tipo_Reserva.value === 'basica') {
 		return "La reserva básica ofrece acceso estándar a nuestras instalaciones con un costo más económico.";
@@ -80,7 +100,18 @@ const descripcionReserva = computed(() => {
 	return "";
 });
 
+// 🔹 Función para hacer la reserva
 const hacerReserva = async () => {
+	if (!usuarioId.value) {
+		Swal.fire({
+			icon: 'warning',
+			title: 'Sesión no válida',
+			text: 'Debes iniciar sesión para realizar una reserva.',
+			confirmButtonColor: '#d33',
+		});
+		return;
+	}
+
 	if (!tipoPlan.value || !tipoPlan.value.tipo) {
 		Swal.fire({
 			icon: 'warning',
@@ -92,7 +123,7 @@ const hacerReserva = async () => {
 	}
 
 	const reservaData = {
-		usuario_id: usuario.value.id,
+		usuario_id: usuarioId.value,
 		plan_id: tipoPlan.value.id,
 		fecha: fecha.value,
 		tipo_Reserva: tipo_Reserva.value,
@@ -101,14 +132,15 @@ const hacerReserva = async () => {
 		pagada: false,
 	};
 
-
 	console.log("Datos enviados:", reservaData);
 
 	try {
+		const token = localStorage.getItem('token');
 		const response = await fetch('http://localhost:8000/reservas/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`, // Se incluye el token JWT
 			},
 			body: JSON.stringify(reservaData),
 		});
@@ -126,9 +158,8 @@ const hacerReserva = async () => {
 		tipo_Reserva.value = '';
 		tipo_Plan.value = '';
 
-		store.dispatch("resetTipoPlan");
+		localStorage.removeItem("tipoPlan");
 
-		console.log(store.state.tipoPlan);
 		Swal.fire({
 			icon: 'success',
 			title: 'Reserva exitosa',
@@ -144,14 +175,21 @@ const hacerReserva = async () => {
 			confirmButtonColor: '#d33',
 		});
 	}
-}
+};
 
-
+// 🔹 Función para ver reservas
 const verReservas = () => {
 	router.push('/ResVer');
 };
 
+// 🔹 Recuperar datos al montar el componente
+onMounted(() => {
+	obtenerUsuarioDesdeJWT();
+	obtenerTipoPlan();
+});
 </script>
+
+
 
 
 

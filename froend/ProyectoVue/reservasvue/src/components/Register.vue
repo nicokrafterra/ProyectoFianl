@@ -2,7 +2,7 @@
 	<div class="container">
 		<div class="form">
 			<form @submit.prevent="handleRegister" class="form_front">
-				<h2 class="form_details">Registrate</h2>
+				<h2 class="form_details">Regístrate</h2>
 
 				<input type="text" v-model="nombre" placeholder="Nombre *" required class="input" />
 				<div v-if="nombreError" style="color: red">{{ nombreError }}</div>
@@ -28,9 +28,6 @@
 					<RouterLink to="/Iniciar" class="signup_tog">Inicia Sesión</RouterLink>
 				</p>
 			</form>
-
-
-
 		</div>
 	</div>
 </template>
@@ -38,7 +35,6 @@
 <script>
 import axios from "axios";
 import Swal from "sweetalert2";
-import { mapActions } from "vuex";
 
 export default {
 	data() {
@@ -71,93 +67,67 @@ export default {
 			return nombreRegex.test(nombre);
 		},
 		validateEmail(email) {
-			const emailPattern =
-				/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+			const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 			return emailPattern.test(email);
 		},
 		validatePassword(password) {
-			const passwordRegex =
-				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d{3,})(?=.*[!@#$%^&*_-])[A-Za-z\d!@#$%^&*_-]{8,}$/;
+			const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d{3,})(?=.*[!@#$%^&*_-])[A-Za-z\d!@#$%^&*_-]{8,}$/;
 			return passwordRegex.test(password);
 		},
 		validateNumeroCelular(numero) {
 			const numeroRegex = /^[0-9]+$/;
 			return numeroRegex.test(numero) && numero.length >= 10;
 		},
-		...mapActions(["registerUsuario"]),
 		async handleRegister() {
 			this.clearErrors();
 
 			let valid = true;
 
-			if (!this.nombre) {
-				this.nombreError = "El nombre es obligatorio.";
-				valid = false;
-			} else if (!this.validateNombre(this.nombre) || this.nombre.length <= 1) {
+			// Validaciones
+			if (!this.nombre || !this.validateNombre(this.nombre)) {
 				this.nombreError = "El nombre debe contener al menos 2 letras.";
 				valid = false;
 			}
-
-			if (!this.apellido) {
-				this.apellidoError = "El apellido es obligatorio.";
-				valid = false;
-			} else if (!this.validateNombre(this.apellido) || this.apellido.length <= 1) {
+			if (!this.apellido || !this.validateNombre(this.apellido)) {
 				this.apellidoError = "El apellido debe contener al menos 2 letras.";
 				valid = false;
 			}
-
-			if (!this.email) {
-				this.emailError = "El correo electrónico es obligatorio.";
-				valid = false;
-			} else if (!this.validateEmail(this.email)) {
+			if (!this.email || !this.validateEmail(this.email)) {
 				this.emailError = "Por favor, introduce un correo electrónico válido.";
 				valid = false;
 			}
-
-			if (!this.password) {
-				this.passwordError = "La contraseña es obligatoria.";
-				valid = false;
-			} else if (!this.validatePassword(this.password)) {
+			if (!this.password || !this.validatePassword(this.password)) {
 				this.passwordError =
-					"La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, 3 números y un carácter especial.";
+					"La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, 3 números y un carácter especial.";
 				valid = false;
 			}
-
 			if (this.password !== this.vpassword) {
 				this.vpasswordError = "Las contraseñas no coinciden.";
 				valid = false;
 			}
-
-			if (!this.numeroCelular) {
-				this.celularError = "El número de celular es obligatorio.";
-				valid = false;
-			} else if (!this.validateNumeroCelular(this.numeroCelular)) {
-				this.celularError =
-					"Por favor, introduce un número de celular válido (solo números, mínimo 10 dígitos).";
+			if (!this.numeroCelular || !this.validateNumeroCelular(this.numeroCelular)) {
+				this.celularError = "Número de celular inválido (mínimo 10 dígitos).";
 				valid = false;
 			}
 
 			if (valid) {
-				const esAdmin = this.email.endsWith(".ad");
-
 				try {
-					const response = await axios.post(
-						"http://localhost:8000/usuarios/",
-						{
-							nombre: this.nombre,
-							apellido: this.apellido,
-							correoElectronico: this.email,
-							contraseñaUsuario: this.password,
-							numeroCelular: this.numeroCelular,
-							esAdmin: esAdmin,
-						}
-					);
+					const response = await axios.post("http://localhost:8000/usuarios/", {
+						nombre: this.nombre,
+						apellido: this.apellido,
+						correoElectronico: this.email,
+						contraseñaUsuario: this.password,
+						numeroCelular: this.numeroCelular,
+					});
 
-					this.registerUsuario(response.data);
+					// Guardar el token en localStorage
+					const token = response.data.access_token;
+					localStorage.setItem("token", token);
+
 					Swal.fire({
 						icon: "success",
-						title: "¡Bienvenido!",
-						text: "Te has registrado exitosamente. Redirigiendo...",
+						title: "¡Registro exitoso!",
+						text: "Te has registrado correctamente. Redirigiendo...",
 						background: "#e0f7fa",
 						color: "#004d40",
 						showConfirmButton: false,
@@ -165,14 +135,12 @@ export default {
 					});
 
 					setTimeout(() => {
-						if (esAdmin) {
-							this.$router.push("/VistaAd");
-						} else {
-							this.$router.push("/index");
-						}
+						this.$router.push("/index"); // Redirigir al usuario
 					}, 1000);
 				} catch (error) {
-					console.error("Error al registrar el usuario:", error);
+					if (error.response && error.response.data) {
+						this.emailError = error.response.data.detail || "Error al registrar usuario.";
+					}
 					Swal.fire({
 						icon: "error",
 						title: "Error al registrar",
@@ -186,6 +154,7 @@ export default {
 	},
 };
 </script>
+
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap");

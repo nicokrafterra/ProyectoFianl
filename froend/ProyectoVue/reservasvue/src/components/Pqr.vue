@@ -24,31 +24,50 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';
 
 const correo = ref('');
 const descripcion = ref('');
 const mensaje = ref('');
+const usuarioId = ref(null);
 
-const store = useStore();
 const router = useRouter();
 
-const usuario = computed(() => store.state.usuario);
+// 🔹 Obtener el ID de usuario desde el token JWT
+const obtenerUsuarioDesdeJWT = () => {
+	const token = localStorage.getItem('token');
 
-const volver = () => {
-	router.back();
+	if (!token) {
+		console.error('⚠️ No se encontró el token en localStorage.');
+		return;
+	}
+
+	try {
+		const decodedToken = jwtDecode(token);
+		console.log('🔍 Token decodificado:', decodedToken); // 👉 Depuración
+
+		if (!decodedToken.sub) {
+			console.error('⚠️ El token no contiene "user_id". Verifica la estructura del token.');
+			return;
+		}
+
+		usuarioId.value = decodedToken.sub;
+	} catch (error) {
+		console.error('❌ Error al decodificar el token:', error);
+	}
 };
 
+// 🔹 Enviar PQR con JWT
 const enviarPqr = async () => {
-	if (!usuario.value || !usuario.value.id) {
-		mensaje.value = 'El usuario no está definido. Inicia sesión para enviar un PQR.';
+	if (!usuarioId.value) {
+		mensaje.value = 'Error: No se pudo obtener la información del usuario. Inicia sesión nuevamente.';
 		return;
 	}
 
 	const pqrData = {
-		usuario_id: usuario.value.id,
+		usuario_id: usuarioId.value,
 		correo: correo.value,
 		descripcion: descripcion.value,
 	};
@@ -58,6 +77,7 @@ const enviarPqr = async () => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.getItem('token')}`, // 🔹 Token JWT en la cabecera
 			},
 			body: JSON.stringify(pqrData),
 		});
@@ -66,17 +86,26 @@ const enviarPqr = async () => {
 			throw new Error('Error al enviar el PQR');
 		}
 
-		const data = await response.json();
-		mensaje.value = 'PQR enviado exitosamente';
-
+		mensaje.value = '✅ PQR enviado exitosamente';
 		correo.value = '';
 		descripcion.value = '';
 	} catch (error) {
 		console.error('Error:', error);
-		mensaje.value = 'No se pudo enviar el PQR. Intenta nuevamente.';
+		mensaje.value = '❌ No se pudo enviar el PQR. Intenta nuevamente.';
 	}
 };
+
+// 🔹 Recuperar el ID del usuario cuando se monta el componente
+onMounted(() => {
+	obtenerUsuarioDesdeJWT();
+});
+
+// 🔹 Función para volver atrás
+const volver = () => {
+	router.go(-1);
+};
 </script>
+
 
 <style scoped>
 
