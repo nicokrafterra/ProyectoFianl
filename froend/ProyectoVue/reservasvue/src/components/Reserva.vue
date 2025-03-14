@@ -198,6 +198,8 @@ onMounted(() => {
 	height: 100vh;
 	display: flex;
 	justify-content: center;
+	align-items: center; /* Centrar verticalmente */
+
 }
 
 .back-button {
@@ -214,11 +216,11 @@ onMounted(() => {
 
 .back-button:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.3),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.3),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #002e02;
+	background-color: #6B8E23; /* Verde Oliva al hacer hover */
 	border-radius: 6px;
 }
 
@@ -228,20 +230,20 @@ onMounted(() => {
 	transition: transform 0.2s ease;
 }
 
-
 .reserva-message {
 	margin-top: 20px;
 	color: #707070;
 	font-size: 14px;
+	text-align: center; /* Centrar el mensaje */
 }
 
 .reserva-button {
 	padding: 10px 35px;
 	cursor: pointer;
-	background-color: #212121;
+	background-color: #6B8E23; /* Verde Oliva */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid #6B8E23;
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.1),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
 	color: #fff;
 	font-size: 15px;
@@ -253,24 +255,19 @@ onMounted(() => {
 
 .reserva-button:hover {
 	transform: scale(1.01);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.2),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.2),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #002e02;
-	margin-right: 1px;
-}
-
-body {
-	height: 100vh;
-	overflow: hidden;
-	font-family: "Poppins", sans-serif;
-	display: flex;
-	background-size: cover;
+	background-color: #8B5A2B; /* Marrón Tierra al hacer hover */
 }
 
 .reserva-form {
-	width: 400px;
+	width: 100%;
+	max-width: 400px; /* Ancho máximo del formulario */
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .form {
@@ -278,83 +275,80 @@ body {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	position: absolute;
-	margin-top: 70px;
 	backface-visibility: hidden;
-	padding: 65px 45px;
+	padding: 40px 30px; /* Padding ajustado */
 	border-radius: 15px;
-	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	backdrop-filter: blur(10px);
+	background-color: #F5DEB3; /* Beige Arena como fondo principal */
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Sombra suave */
+	width: 100%;
 }
 
 .form input,
 .form select {
-	width: 254px;
+	width: 100%;
 	min-height: 45px;
-	color: #fff;
+	color: #212121; /* Texto oscuro */
 	outline: none;
 	transition: 0.35s;
-	padding: 0px 7px;
-	background-color: #212121;
+	padding: 0px 10px;
+	background-color: #FFFFFF; /* Fondo blanco */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid #8B5A2B; /* Marrón Tierra */
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.1),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
+	margin-bottom: 15px; /* Espaciado entre inputs */
 }
 
-
+.form input:focus,
+.form select:focus {
+	border-color: #D4A017; /* Amarillo Mostaza al enfocar */
+	transform: scale(1.02);
+}
 
 .form .ver-reservas-button {
 	padding: 10px 35px;
 	cursor: pointer;
-	background-color: #212121;
+	background-color: #D4A017; /* Amarillo Mostaza */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid #D4A017;
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.1),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
 	color: #fff;
 	font-size: 15px;
 	font-weight: bold;
 	transition: 0.35s;
-	margin-left: 10px;
-	width: 250px;
+	width: 100%;
+	margin-top: 10px; /* Espaciado superior */
 }
 
 .form .ver-reservas-button:hover {
 	transform: scale(1.01);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.2),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.2),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #002e02;
-	margin-left: 11px;
+	background-color: #C1440E; /* Rojo Terracota al hacer hover */
 }
 
 .form-group {
-	margin: 20px;
-	justify-content: center;
-	align-items: center;
+	margin: 20px 0;
+	width: 100%;
 	display: flex;
-	margin-left: auto;
-	margin-right: auto;
+	flex-direction: column;
+	align-items: center;
 }
 
 .texto-descriptivo {
-	margin: 20px;
-	justify-content: center;
-	align-items: center;
-	display: flex;
-	width: 400px;
+	margin: 20px 0;
 	text-align: center;
+	color: #6B8E23; /* Verde Oliva */
+	font-size: 14px;
+	width: 100%;
 }
 
-#tipo_Reserva {
-	width: 320px;
-}
-
+#tipo_Reserva,
 #fecha {
-	width: 310px;
+	width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -364,12 +358,12 @@ body {
 
 	.form input,
 	.form select {
-		max-width: 100%;
+		width: 100%;
 	}
 
 	.reserva-button,
 	.ver-reservas-button {
-		max-width: 100%;
+		width: 100%;
 	}
 }
 

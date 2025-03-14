@@ -108,12 +108,12 @@ const volver = () => {
 
 
 <style scoped>
-
-.contpri{
+.contpri {
 	height: 100vh;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+ /* Beige Arena como fondo principal */
 }
 
 .pqr-form {
@@ -126,13 +126,15 @@ const volver = () => {
 	backface-visibility: hidden;
 	padding: 65px 45px;
 	border-radius: 15px;
-	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
+	background-color: #f5deb3e6; /* Fondo blanco para el formulario */
+	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.2),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 	backdrop-filter: blur(10px);
+	border: 1px solid #8B5A2B; /* Marrón Tierra para el borde */
 }
 
 h2 {
-	color: #000000;
+	color: #6B8E23; /* Verde Oliva para el título */
 	font-size: 24px;
 	margin-bottom: 20px;
 }
@@ -144,7 +146,7 @@ h2 {
 
 label {
 	font-weight: bold;
-	color: #000000;
+	color: #6B8E23; /* Verde Oliva para las etiquetas */
 	display: block;
 	margin-bottom: 8px;
 }
@@ -153,26 +155,26 @@ input[type="email"],
 textarea {
 	width: 245px;
 	min-height: 45px;
-	color: #fff;
+	color: #212121; /* Texto oscuro para contraste */
 	outline: none;
 	transition: 0.35s;
 	padding: 0px 7px;
-	background-color: #212121;
+	background-color: #FFFFFF; /* Fondo blanco para los inputs */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid #8B5A2B; /* Marrón Tierra para el borde */
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.1),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
 }
 
 input[type="email"]:focus,
 textarea:focus {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.2),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.2),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+	border-color: #D4A017; /* Amarillo Mostaza al enfocar */
 }
-
 
 textarea {
 	resize: vertical;
@@ -182,12 +184,12 @@ textarea {
 .btn {
 	padding: 10px 35px;
 	cursor: pointer;
-	background-color: #212121;
+	background-color: #6B8E23; /* Verde Oliva para el botón */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid #6B8E23; /* Verde Oliva para el borde */
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.1),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
-	color: #fff;
+	color: #FFFFFF; /* Texto blanco para contraste */
 	font-size: 15px;
 	font-weight: bold;
 	transition: 0.35s;
@@ -195,15 +197,17 @@ textarea {
 
 .btn:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.2),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.2),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+	background-color: #8B5A2B; /* Marrón Tierra al hacer hover */
+	border-color: #8B5A2B; /* Marrón Tierra al hacer hover */
 }
 
 .mensaje {
 	margin-top: 20px;
-	color: #d9534f;
+	color: #C1440E; /* Rojo Terracota para mensajes de error */
 	font-weight: bold;
 }
 
@@ -217,14 +221,14 @@ textarea {
 	transition: 0.35s;
 }
 
-.back-button:hover{
+.back-button:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.2),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.2),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-		background-color: #002e02;
-		border-radius: 6px;
+	background-color: #6B8E23; /* Verde Oliva al hacer hover */
+	border-radius: 6px;
 }
 
 .back-button img {
@@ -233,4 +237,19 @@ textarea {
 	transition: transform 0.2s ease;
 }
 
+/* Animación de entrada */
+.pqr-form {
+    animation: zoomRotateIn 1s ease-out;
+}
+
+@keyframes zoomRotateIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5) rotate(-10deg); /* Zoom reducido y ligero giro */
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg); /* Estado final: tamaño normal y sin giro */
+    }
+}
 </style>

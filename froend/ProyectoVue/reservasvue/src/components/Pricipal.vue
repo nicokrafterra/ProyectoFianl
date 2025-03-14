@@ -1,31 +1,45 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import { jwtDecode } from 'jwt-decode';
+//-------------------------------------------------------------------------------------------------------------
+// Se realizan todas las importaciones correspondientes
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'; // Importaciones de Vue
+import { useStore } from 'vuex'; // Para manejar el estado global
+import { useRouter } from 'vue-router'; // Para manejar la navegación
+import { jwtDecode } from 'jwt-decode'; // Para decodificar tokens JWT
+import { watch } from 'vue'; // Para observar cambios en las propiedades reactivas
+//--------------------------------------------------------------------------------------------------------------
 
+// Definición de variables reactivas
+const isHidden = ref(true); // Controla la visibilidad del menú desplegable
+const isFading = ref(false); // Controla la animación de desvanecimiento del menú
+const Menu = ref(null); // Referencia al menú desplegable
+const store = useStore(); // Acceso al store de Vuex
+const router = useRouter(); // Acceso al router de Vue
+const token = ref(localStorage.getItem("token")); // Obtiene el token del localStorage
+const usuario = computed(() => store.state.usuario); // Obtiene el usuario del store
+const imagenPorDefecto = ref("../assets/IMG/foto.png"); // Ruta de la imagen de perfil por defecto
 
-const isHidden = ref(true);
-const isFading = ref(false);
-const Menu = ref(null);
-
-const store = useStore();
-const router = useRouter();
-
-const usuario = computed(() => store.state.usuario);
-const imagenPorDefecto = ref("../assets/IMG/foto.png");
-
+//---------------------------------------------------------------------------------------------------------------
+// Propiedad computada para obtener la URL de la imagen del store
 const imagenPerfil = computed(() => {
-    return usuario.value && usuario.value.imagen 
-        ? `http://localhost:8000/${usuario.value.imagen}`
-        : imagenPorDefecto.value;
+    const imagen = store.state.usuario?.imagen; // Obtiene la imagen del usuario del store
+    console.log("URL de la imagen en el componente:", imagen); // Depuración
+    return imagen
+        ? `http://localhost:8000/${imagen}?${Date.now()}` // Agrega un timestamp para evitar caché
+        : imagenPorDefecto.value; // Ruta de la imagen por defecto
 });
 
+// Observar cambios en el store para la imagen del usuario
+watch(() => store.state.usuario?.imagen, (nuevaImagen) => {
+    console.log("Nueva imagen en el store:", nuevaImagen); // Depuración
+});
+
+// Función para alternar la visibilidad del menú desplegable
 const toggleDropdown = () => {
     isHidden.value = !isHidden.value;
     isFading.value = !isHidden.value;
 };
 
+// Función para cerrar el menú desplegable al hacer clic fuera de él
 const handleClickOutside = (event) => {
     if (Menu.value && !Menu.value.contains(event.target) && !event.target.classList.contains('perfil')) {
         isHidden.value = true;
@@ -33,26 +47,38 @@ const handleClickOutside = (event) => {
     }
 };
 
+// Función para redirigir al inicio de sesión
+const redirigirALogin = () => {
+    router.push("/Iniciar");
+};
+
+// Función para cerrar sesión
+const cerrarSesion = () => {
+    localStorage.removeItem("token"); // Elimina el token del localStorage
+    token.value = null; // Actualiza el estado del token
+    store.commit("setUsuario", null); // Limpia el usuario en el store
+    window.location.reload(); // Recarga la página
+};
+
+// Hook de ciclo de vida: cuando el componente se monta
 onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
-
-    // Obtener el token del localStorage
-    const token = localStorage.getItem("token");
-
-    if (token) {
+    document.addEventListener('click', handleClickOutside); // Escucha clics fuera del menú
+    if (token.value) {
         try {
-            const decoded = jwtDecode(token);
-            store.commit("setUsuario", decoded);
+            const decoded = jwtDecode(token.value); // Decodifica el token JWT
+            store.commit("setUsuario", decoded); // Guarda el usuario decodificado en el store
         } catch (error) {
             console.error("Error al decodificar el token:", error);
-            localStorage.removeItem("token"); // Eliminar token corrupto
-            router.push("/Iniciar"); // Redirigir al login si hay un error
+            localStorage.removeItem("token"); // Elimina el token corrupto
+            token.value = null; // Actualiza el estado del token
+            router.push("/Iniciar"); // Redirige al login si hay un error
         }
     }
 });
 
+// Hook de ciclo de vida: antes de que el componente se desmonte
 onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener('click', handleClickOutside); // Elimina el listener de clics
 });
 </script>
 
@@ -69,12 +95,23 @@ onBeforeUnmount(() => {
 			<router-link class="icon-p" to="/TablaPqrRes">
 				<img class="icon" src="../assets/IMG/notification.svg" alt="Notificación" />
 			</router-link>
-			<img class="perfil" :src="imagenPerfil" :key="imagenPerfil" alt="Imagen de perfil"
-				@click="toggleDropdown" />
+
+			<!-- Botón de Iniciar sesión si no hay token -->
+			<router-link v-if="!token" to="/Iniciar" class="login-button">
+				Iniciar sesión
+			</router-link>
+
+			<!-- Menú desplegable si hay token -->
+			<template v-else>
+				<div :key="componentKey">
+					<img class="perfil" :src="imagenPerfil" :key="imagenPerfil" alt="Imagen de perfil"
+						@click="toggleDropdown" />
+				</div>
+			</template>
 		</span>
 
-
-		<div class="Menu-desple" :class="{ hide: isHidden, 'Menu-desple-gable': isFading }" ref="Menu">
+		<!-- Menú desplegable (solo visible si hay token) -->
+		<div v-if="token" class="Menu-desple" :class="{ hide: isHidden, 'Menu-desple-gable': isFading }" ref="Menu">
 			<div class="Menu__group">
 				<div class="nombre-usuario">{{ usuario?.nombre }}</div>
 				<div class="email">{{ usuario?.correoElectronico }}</div>
@@ -97,7 +134,7 @@ onBeforeUnmount(() => {
 				</ul>
 				<hr class="divider" />
 				<ul>
-					<router-link class="ramdon" to="/Iniciar">
+					<router-link class="ramdon" to="/Iniciar" @click="cerrarSesion">
 						<img src="../assets/IMG/logout.svg" alt="Log Out" /> Salir
 					</router-link>
 				</ul>
@@ -109,36 +146,46 @@ onBeforeUnmount(() => {
 		<div class="content-banner">
 			<p>Lugares Hermosos</p>
 			<h2>Comida deliciosa <br />Ingredientes 100% Naturales</h2>
-			<router-link to="/Reservas">Reserva ahora</router-link>
+			<!-- Botón de "Reserva ahora" -->
+			<router-link v-if="token" to="/Reservas">Reserva ahora</router-link>
+			<button v-else class="login-button" @click="redirigirALogin">Inicia sesión para reservar</button>
 		</div>
 	</section>
 
 	<main class="main-content">
-
 		<section class="container top-categories">
 			<h1 class="heading-1">Nuestras Experiencias</h1>
 			<div class="container-categories">
+				<!-- Tarjeta 1: Camping -->
 				<div class="card-category category-moca">
 					<img class="Img-PrimerCard" src="../assets/IMG/campfire-896196_1280.jpg" alt="">
 					<p>Camping a campo abierto</p>
-					<router-link to="Camping"><span>Ver más</span></router-link>
+					<router-link v-if="token" to="Camping"><span>Ver más</span></router-link>
+					<button v-else class="login-button" @click="redirigirALogin">Inicia sesión para ver más</button>
 				</div>
+
+				<!-- Tarjeta 2: Recorrido guiado -->
 				<div class="card-category category-moca">
 					<img class="Img-PrimerCard" src="..\assets\IMG\bike-2388449_1280.jpg" alt="">
 					<p>Recorrido guiado</p>
-					<router-link to="Recorrido"><span>Ver más</span></router-link>
+					<router-link v-if="token" to="Recorrido"><span>Ver más</span></router-link>
+					<button v-else class="login-button" @click="redirigirALogin">Inicia sesión para ver más</button>
 				</div>
+
+				<!-- Tarjeta 3: Reserva lugares para eventos -->
 				<div class="card-category category-moca">
 					<img class="Img-PrimerCard" src="..\assets/IMG/Eventossss.jpg" alt="">
 					<p>Reserva lugares para eventos</p>
-					<router-link to="/Eventos"><span>Ver más</span></router-link>
-
+					<router-link v-if="token" to="/Eventos"><span>Ver más</span></router-link>
+					<button v-else class="login-button" @click="redirigirALogin">Inicia sesión para ver más</button>
 				</div>
+
+				<!-- Tarjeta 4: Reserva de Mesas -->
 				<div class="card-category category-moca">
 					<img class="Img-PrimerCard" src="..\assets\IMG\event-6927353_1280.jpg" alt="">
 					<p>Reserva de Mesas</p>
-					<router-link to="/Mesas"><span>Ver más</span></router-link>
-
+					<router-link v-if="token" to="/Mesas"><span>Ver más</span></router-link>
+					<button v-else class="login-button" @click="redirigirALogin">Inicia sesión para ver más</button>
 				</div>
 			</div>
 		</section>
@@ -153,25 +200,9 @@ onBeforeUnmount(() => {
 						<img class="IMG-Platos" src="../assets/IMG/Currasco.png" alt="">
 						<span class="discount">-13%</span>
 						<div class="button-group">
-							<span>
-								<i class="fa-regular fa-eye"></i>
-							</span>
-							<span>
-								<i class="fa-regular fa-heart"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-code-compare"></i>
-							</span>
 						</div>
 					</div>
 					<div class="content-card-product">
-						<div class="stars">
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-regular fa-star"></i>
-						</div>
 						<h3>Churrasco</h3>
 						<p class="price">$4.60 <span>$5.30</span></p>
 						<router-link class="redirect-button" to="/Platos">Ver Plato</router-link>
@@ -183,25 +214,9 @@ onBeforeUnmount(() => {
 						<img class="IMG-Platos" src="../assets/IMG/Pechuga.jpg" alt="">
 						<span class="discount">-22%</span>
 						<div class="button-group">
-							<span>
-								<i class="fa-regular fa-eye"></i>
-							</span>
-							<span>
-								<i class="fa-regular fa-heart"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-code-compare"></i>
-							</span>
 						</div>
 					</div>
 					<div class="content-card-product">
-						<div class="stars">
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-regular fa-star"></i>
-							<i class="fa-regular fa-star"></i>
-						</div>
 						<h3>Pechuga gratinada</h3>
 
 						<p class="price">$5.70 <span>$7.30</span></p>
@@ -213,25 +228,9 @@ onBeforeUnmount(() => {
 					<div class="container-img">
 						<img class="IMG-Platos" src="../assets/IMG/Fetuchino.jpg" alt="">
 						<div class="button-group">
-							<span>
-								<i class="fa-regular fa-eye"></i>
-							</span>
-							<span>
-								<i class="fa-regular fa-heart"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-code-compare"></i>
-							</span>
 						</div>
 					</div>
 					<div class="content-card-product">
-						<div class="stars">
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-						</div>
 						<h3>Fetuccini</h3>
 						<p class="price">$3.20</p>
 						<router-link class="redirect-button" to="/Platos">Ver Plato</router-link>
@@ -242,25 +241,9 @@ onBeforeUnmount(() => {
 					<div class="container-img">
 						<img class="IMG-Platos" src="../assets/IMG/Picada.jpg" alt="">
 						<div class="button-group">
-							<span>
-								<i class="fa-regular fa-eye"></i>
-							</span>
-							<span>
-								<i class="fa-regular fa-heart"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-code-compare"></i>
-							</span>
 						</div>
 					</div>
 					<div class="content-card-product">
-						<div class="stars">
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-regular fa-star"></i>
-						</div>
 						<h3>Picadas</h3>
 						<p class="price">$5.60</p>
 						<router-link class="redirect-button" to="/Platos">Ver Plato</router-link>
@@ -278,25 +261,9 @@ onBeforeUnmount(() => {
 						<img class="IMG-Platos" src="../assets/IMG/Bagre.jpg" alt="">
 						<span class="discount">-13%</span>
 						<div class="button-group">
-							<span>
-								<i class="fa-regular fa-eye"></i>
-							</span>
-							<span>
-								<i class="fa-regular fa-heart"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-code-compare"></i>
-							</span>
 						</div>
 					</div>
 					<div class="content-card-product">
-						<div class="stars">
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-regular fa-star"></i>
-						</div>
 						<h3>Bagre frito</h3>
 						<p class="price">$4.60 <span>$5.30</span></p>
 						<router-link class="redirect-button" to="/Platos">Ver Plato</router-link>
@@ -308,25 +275,9 @@ onBeforeUnmount(() => {
 						<img class="IMG-Platos" src="../assets/IMG/Lengua.jpg" alt="">
 						<span class="discount">-22%</span>
 						<div class="button-group">
-							<span>
-								<i class="fa-regular fa-eye"></i>
-							</span>
-							<span>
-								<i class="fa-regular fa-heart"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-code-compare"></i>
-							</span>
 						</div>
 					</div>
 					<div class="content-card-product">
-						<div class="stars">
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-regular fa-star"></i>
-							<i class="fa-regular fa-star"></i>
-						</div>
 						<h3>Lengua en salsa criolla</h3>
 						<p class="price">$5.70 <span>$7.30</span></p>
 						<router-link class="redirect-button" to="/Platos">Ver Plato</router-link>
@@ -338,25 +289,9 @@ onBeforeUnmount(() => {
 						<img class="IMG-Platos" src="../assets/IMG/PuntaAnca.jpg" alt="">
 						<span class="discount">-30%</span>
 						<div class="button-group">
-							<span>
-								<i class="fa-regular fa-eye"></i>
-							</span>
-							<span>
-								<i class="fa-regular fa-heart"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-code-compare"></i>
-							</span>
 						</div>
 					</div>
 					<div class="content-card-product">
-						<div class="stars">
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-						</div>
 						<h3>Punta de anca</h3>
 						<p class="price">$3.85 <span>$5.50</span></p>
 						<router-link class="redirect-button" to="/Platos">Ver Plato</router-link>
@@ -367,25 +302,9 @@ onBeforeUnmount(() => {
 					<div class="container-img">
 						<img class="IMG-Platos" src="../assets/IMG/MOjarraDiabla.jpg" alt="">
 						<div class="button-group">
-							<span>
-								<i class="fa-regular fa-eye"></i>
-							</span>
-							<span>
-								<i class="fa-regular fa-heart"></i>
-							</span>
-							<span>
-								<i class="fa-solid fa-code-compare"></i>
-							</span>
 						</div>
 					</div>
 					<div class="content-card-product">
-						<div class="stars">
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-solid fa-star"></i>
-							<i class="fa-regular fa-star"></i>
-						</div>
 						<h3>Mojarra a la diabla</h3>
 						<p class="price">$5.60</p>
 						<router-link class="redirect-button" to="/Platos">Ver Plato</router-link>
@@ -402,7 +321,7 @@ onBeforeUnmount(() => {
 					<p class="title-footer">Información de Contacto</p>
 					<ul>
 						<li>
-Kilometro .....
+							Kilometro .....
 						</li>
 						<li>Teléfono: 313-430-9651</li>
 						<li>EmaiL: Reservas@support.com</li>
@@ -416,15 +335,35 @@ Kilometro .....
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-
 :root {
-	--primary: #fe8248;
-	--text: #0F192D;
+	--primary: #C1440E; /* Rojo Terracota */
+	--secondary: #6B8E23; /* Verde Oliva */
+	--accent: #D4A017; /* Amarillo Mostaza */
+	--neutral: #F5DEB3; /* Beige Arena */
+	--text: #8B5A2B; /* Marrón Tierra */
 	--text-gray: #5A678C;
-	--gray: #c0bcff;
 	--error: #E3452F;
 }
 
+.A-logo{
+	filter: brightness(0.6) sepia(0.4) hue-rotate(60deg) saturate(1.5);
+}
+
+.login-button {
+	padding: 8px 16px;
+	background-color: var(--secondary);
+	color: white;
+	border-radius: 4px;
+	border: none;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-block;
+	margin-top: 10px;
+}
+
+.login-button:hover {
+	background-color: #5A7D1A;
+}
 
 header {
 	position: fixed;
@@ -440,7 +379,6 @@ header {
 	justify-content: end;
 	z-index: 1000;
 }
-
 
 .navegar__Usuario {
 	display: flex;
@@ -458,13 +396,12 @@ header {
 
 .navegar__Usuario>.icon:hover {
 	transform: scale(1.1);
-	filter: brightness(0) saturate(100%) invert(24%) sepia(96%) saturate(3748%) hue-rotate(4deg) brightness(99%) contrast(108%);
+	filter: brightness(0.6) sepia(0.4) hue-rotate(60deg) saturate(1.5);
 }
-
 
 .navegar__Usuario>.icon-p:hover {
 	transform: scale(1.3);
-	filter: brightness(0) saturate(100%) invert(24%) sepia(96%) saturate(3748%) hue-rotate(4deg) brightness(99%) contrast(108%);
+	filter: brightness(0.6) sepia(0.4) hue-rotate(60deg) saturate(1.5);
 }
 
 .nombre-usuario {
@@ -474,15 +411,12 @@ header {
 	color: var(--text);
 }
 
-
-
 .perfil {
 	display: block;
 	object-fit: cover;
 	width: 50px;
 	height: 50px;
 	cursor: pointer;
-	/*border-radius: 50%;*/
 	border: 2px solid #ffffff;
 	filter: drop-shadow(-20px 0 10px rgba(0, 0, 0, 0.1));
 	border-radius: 50%
@@ -491,7 +425,7 @@ header {
 .perfil:hover {
 	transform: scale(1.1);
 	transition: all 0.4s ease-in-out;
-	border: 3.5px solid #fe2d04;
+	border: 3.5px solid var(--accent);
 }
 
 .email {
@@ -509,7 +443,7 @@ header {
 	flex-direction: column;
 	gap: 4px;
 	animation: fadeOutAnimation ease-in-out 0.3s forwards;
-	background-color: #fff;
+	background-color: var(--neutral);
 }
 
 .Menu-desple-gable {
@@ -585,7 +519,7 @@ nav>ul>li {
 	gap: 16px;
 	padding-left: 8px;
 	width: 100%;
-	color: #0F192D;
+	color: var(--text);
 	list-style: none;
 	text-decoration: none;
 }
@@ -593,6 +527,7 @@ nav>ul>li {
 .ramdon:hover {
 	cursor: pointer;
 	text-decoration: underline;
+	background-color: var(--neutral);
 }
 
 nav>ul>li>img {
@@ -612,7 +547,7 @@ nav>ul>li:hover {
 }
 
 .A-logo svg {
-	stroke: var(--text-color);
+	stroke: var(--text);
 	stroke-width: 0.5rem;
 	width: 3rem;
 	height: 3rem;
@@ -631,7 +566,7 @@ nav>ul>li:hover {
 	border-radius: 1.2rem;
 	height: 20rem;
 	overflow: hidden;
-	background: var(--background);
+	background: var(--neutral);
 	transition: 0.4s ease-in-out;
 	box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
 	flex: 0.25;
@@ -650,30 +585,12 @@ nav>ul>li:hover {
 	border-radius: 1rem;
 }
 
-/* polish images center */
-.card:nth-child(1) img {
-	left: -8rem;
-}
-
-.card:nth-child(2) img {
-	left: -6rem;
-}
-
-.card:nth-child(3) img {
-	left: -14rem;
-}
-
-.card:nth-child(4) img {
-	left: -8rem;
-}
-
-
 .banner {
 	background-image: url('tu-imagen-de-fondo.jpg');
 	background-size: cover;
 	background-position: center;
 	padding: 100px 0;
-	color: #fff;
+	color: var(--neutral);
 	text-align: center;
 }
 
@@ -691,25 +608,24 @@ nav>ul>li:hover {
 .content-banner a {
 	display: inline-block;
 	padding: 10px 30px;
-	background-color: #ff6347;
-	color: #fff;
+	background-color: var(--accent);
+	color: var(--neutral);
 	text-decoration: none;
 	border-radius: 5px;
 	transition: background-color 0.3s;
 }
 
 .content-banner a:hover {
-	background-color: #e5533d;
+	background-color: #B38915;
 }
-
 
 .main-content {
 	padding: 60px 0;
-	background-color: #f9f9f9a5;
+	background-color: var(--neutral);
 }
 
 .container {
-	max-width: 1200px;
+	max-width: 1200%;
 	margin: 0 auto;
 	padding: 0 15px;
 }
@@ -718,9 +634,8 @@ nav>ul>li:hover {
 	font-size: 36px;
 	text-align: center;
 	margin-bottom: 40px;
-	color: #333;
+	color: var(--text);
 }
-
 
 .top-categories .container-categories {
 	display: flex;
@@ -733,39 +648,40 @@ nav>ul>li:hover {
 }
 
 .card-category {
-	background-color: #fff;
-	border-radius: 10px;
+	background-color: var(--neutral);
+	border-radius: 20px;
 	text-align: center;
-	flex-basis: 30%;
+	flex-basis: 80%;
 	transition: transform 0.3s, box-shadow 0.3s;
 	margin: 10px;
+	padding-bottom: 15px;
+	box-shadow: 40px 20px 30px rgba(0, 0, 0, 0.199);
 }
 
 .card-category:hover {
 	transform: translateY(-10px);
-	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+	box-shadow: 10px 20px 30px rgba(0, 0, 0, 0.1);
 }
 
 .card-category p {
-	font-size: 24px;
-	margin-bottom: 15px;
-	color: #333;
+	font-size: 20px;
+	margin-bottom: 18px;
+	color: var(--text);
 }
 
 .card-category span {
 	display: inline-block;
-	padding: 8px 20px;
-	background-color: #ff6347;
-	color: #fff;
-	border-radius: 5px;
+	padding: 8px 30px;
+	background-color: var(--accent);
+	color: var(--neutral);
+	border-radius: 8px;
 	cursor: pointer;
 	transition: background-color 0.3s;
 }
 
 .card-category span:hover {
-	background-color: #e5533d;
+	background-color: #B38915;
 }
-
 
 .top-products,
 .specials {
@@ -781,7 +697,7 @@ nav>ul>li:hover {
 .container-options span {
 	margin: 0 15px;
 	cursor: pointer;
-	color: #333;
+	color: var(--text);
 	font-size: 18px;
 	position: relative;
 }
@@ -798,17 +714,17 @@ nav>ul>li:hover {
 }
 
 .card-product {
-	background-color: #fff;
+	background-color: var(--neutral);
 	border-radius: 10px;
 	flex-basis: 22%;
 	transition: transform 0.3s, box-shadow 0.3s;
 	position: relative;
-
+	box-shadow: 40px 20px 40px rgba(0, 0, 0, 0.199);
 }
 
 .card-product:hover {
 	transform: translateY(-10px);
-	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .IMG-Platos {
@@ -825,8 +741,8 @@ nav>ul>li:hover {
 	position: absolute;
 	top: 10px;
 	left: 10px;
-	background-color: #ff6347;
-	color: #fff;
+	background-color: var(--accent);
+	color: var(--neutral);
 	padding: 5px 10px;
 	border-radius: 5px;
 }
@@ -839,18 +755,17 @@ nav>ul>li:hover {
 
 .button-group span {
 	cursor: pointer;
-	color: #555;
+	color: var(--text);
 	font-size: 16px;
 }
 
 .content-card-product {
 	padding: 20px;
 	text-align: center;
-	width: 100%;
 }
 
 .stars i {
-	color: #ff6347;
+	color: var(--accent);
 }
 
 .price {
@@ -860,13 +775,13 @@ nav>ul>li:hover {
 
 .price span {
 	text-decoration: line-through;
-	color: #999;
+	color: var(--text-gray);
 }
 
 .add-cart {
 	cursor: pointer;
-	background-color: #ff6347;
-	color: #fff;
+	background-color: var(--accent);
+	color: var(--neutral);
 	padding: 5px 10px;
 	border-radius: 5px;
 	position: absolute;
@@ -876,10 +791,9 @@ nav>ul>li:hover {
 }
 
 .add-cart:hover {
-	background-color: #e5533d;
+	background-color: #B38915;
 }
 
-/* Blogs Section */
 .container-blogs {
 	display: flex;
 	flex-wrap: wrap;
@@ -888,7 +802,7 @@ nav>ul>li:hover {
 }
 
 .card-blog {
-	background-color: #fff;
+	background-color: var(--neutral);
 	border-radius: 10px;
 	flex-basis: 30%;
 	transition: transform 0.3s, box-shadow 0.3s;
@@ -916,7 +830,7 @@ nav>ul>li:hover {
 
 .button-group-blog span {
 	cursor: pointer;
-	color: #fff;
+	color: var(--neutral);
 	background-color: rgba(0, 0, 0, 0.5);
 	padding: 5px;
 	border-radius: 50%;
@@ -934,15 +848,15 @@ nav>ul>li:hover {
 .content-blog span {
 	display: block;
 	font-size: 14px;
-	color: #999;
+	color: var(--text-gray);
 	margin-bottom: 15px;
 }
 
 .btn-read-more {
 	margin-top: 20px;
 	padding: 10px;
-	background-color: #ff6347;
-	color: #fff;
+	background-color: var(--accent);
+	color: var(--neutral);
 	text-align: center;
 	border-radius: 5px;
 	cursor: pointer;
@@ -950,79 +864,12 @@ nav>ul>li:hover {
 }
 
 .btn-read-more:hover {
-	background-color: #e5533d;
-}
-
-
-.footer {
-	background-color: #333;
-	color: #fff;
-	padding: 60px 0;
-}
-
-.container-footer {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-around;
-}
-
-.menu-footer {
-	flex-basis: 20%;
-}
-
-.title-footer {
-	font-size: 18px;
-	margin-bottom: 20px;
-}
-
-.menu-footer ul {
-	list-style: none;
-	padding: 0;
-}
-
-.menu-footer li {
-	margin-bottom: 10px;
-}
-
-.menu-footer a {
-	color: #fff;
-	text-decoration: none;
-	transition: color 0.3s;
-}
-
-.menu-footer a:hover {
-	color: #ff6347;
-}
-
-.social-icons {
-	display: flex;
-	gap: 15px;
-	margin-top: 20px;
-}
-
-.social-icons span {
-	cursor: pointer;
-	font-size: 18px;
-	color: #fff;
-}
-
-.social-icons span:hover {
-	color: #ff6347;
-}
-
-.newsletter input {
-	width: 100%;
-	padding: 10px;
-	border-radius: 5px;
-	border: none;
-	margin-top: 10px;
-	background-color: #555;
-	color: #fff;
+	background-color: #B38915;
 }
 
 .footer {
-	background: linear-gradient(135deg, #333, #444);
-	color: #fff;
+	background: linear-gradient(135deg, var(--text), #444);
+	color: var(--neutral);
 	padding: 80px 0;
 	font-family: 'Poppins', sans-serif;
 }
@@ -1043,7 +890,7 @@ nav>ul>li:hover {
 	font-size: 20px;
 	margin-bottom: 24px;
 	font-weight: 600;
-	color: #ff6347;
+	color: var(--accent);
 }
 
 .menu-footer ul {
@@ -1063,7 +910,7 @@ nav>ul>li:hover {
 }
 
 .menu-footer a:hover {
-	color: #ff6347;
+	color: var(--accent);
 }
 
 .social-icons {
@@ -1081,7 +928,7 @@ nav>ul>li:hover {
 
 .social-icons span:hover {
 	transform: scale(1.2);
-	color: #ff6347;
+	color: var(--accent);
 }
 
 .newsletter input {
@@ -1091,7 +938,7 @@ nav>ul>li:hover {
 	border: none;
 	margin-top: 15px;
 	background-color: #555;
-	color: #fff;
+	color: var(--neutral);
 	font-size: 16px;
 }
 
@@ -1100,7 +947,7 @@ nav>ul>li:hover {
 	display: block;
 	height: 4px;
 	width: 80px;
-	background-color: #ff6347;
+	background-color: var(--accent);
 	margin: 0 auto 40px;
 }
 
@@ -1108,7 +955,7 @@ nav>ul>li:hover {
 	display: inline-block;
 	padding: 10px 20px;
 	background-color: var(--primary);
-	color: #fff;
+	color: var(--neutral);
 	text-transform: uppercase;
 	text-decoration: none;
 	font-weight: 600;
@@ -1120,12 +967,12 @@ nav>ul>li:hover {
 }
 
 .redirect-button:hover {
-	background-color: #e5533d;
+	background-color: #A53A0C;
 	transform: translateY(-5px);
 }
 
 .redirect-button:active {
-	background-color: #c44d2c;
+	background-color: #8C320A;
 	transform: translateY(0);
 }
 
@@ -1197,7 +1044,6 @@ nav>ul>li:hover {
 	.IMG-Platos {
 		width: 300px;
 	}
-
 }
 
 @media (max-width: 1024px) {
@@ -1232,7 +1078,7 @@ nav>ul>li:hover {
 	}
 
 	.card-category {
-		flex-basis: 48%;
+		flex-basis: 90%;
 		width: 200px;
 	}
 

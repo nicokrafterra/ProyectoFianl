@@ -159,11 +159,22 @@ export default {
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap");
 
+:root {
+	--verde-oliva: #6B8E23;
+	--marron-tierra: #8B5A2B;
+	--beige-arena: #F5DEB3;
+	--rojo-terracota: #C1440E;
+	--amarillo-mostaza: #D4A017;
+	--texto: #fff;
+	--fondo: #212121;
+}
+
 .container {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
+	background-color: var(--marron-tierra); /* Fondo con Marrón Tierra */
 }
 
 .form {
@@ -188,46 +199,47 @@ export default {
 	backface-visibility: hidden;
 	padding: 65px 45px;
 	border-radius: 15px;
-	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
+	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.5),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 	backdrop-filter: blur(10px);
+	background-color: var(--beige-arena); /* Fondo del formulario con Beige Arena */
 }
 
 .input {
 	width: 245px;
 	min-height: 45px;
-	color: #fff;
+	color: var(--texto); /* Texto en blanco */
 	outline: none;
 	transition: 0.35s;
 	padding: 0px 7px;
-	background-color: #212121;
+	background-color: var(--fondo); /* Fondo del input con Marrón Tierra */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid var(--rojo-terracota); /* Borde con Rojo Terracota */
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
 }
 
 .input::placeholder {
-	color: #999;
+	color: var(--amarillo-mostaza); /* Placeholder con Amarillo Mostaza */
 }
 
 .input:focus {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.5),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
 .btn-reg {
 	padding: 10px 35px;
 	cursor: pointer;
-	background-color: #212121;
+	background-color: var(--rojo-terracota); /* Fondo del botón con Rojo Terracota */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid var(--rojo-terracota); /* Borde con Rojo Terracota */
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
-	color: #fff;
+	color: var(--texto); /* Texto en blanco */
 	font-size: 15px;
 	font-weight: bold;
 	transition: 0.35s;
@@ -235,25 +247,73 @@ export default {
 
 .btn-reg:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.5),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
 .switch {
 	font-size: 13px;
-	color: white;
+	color: var(--texto); /* Texto en blanco */
 }
 
 .signup_tog {
 	font-weight: 700;
 	cursor: pointer;
 	text-decoration: none;
-	color: #fff;
+	color: var(--amarillo-mostaza); /* Enlace con Amarillo Mostaza */
 }
 
 .signup_tog:hover {
 	text-decoration: underline;
 }
+
+/*------------------- responsive ---------------------*/
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .form .form_front {
+        height: auto;
+        padding: 30px 20px;
+        gap: 15px;
+        box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.5),
+            inset -1px -1px 3px rgba(255, 255, 255, 0.4);
+    }
+
+    .input {
+        width: 100%; /* Ocupa todo el ancho disponible */
+        font-size: 14px; /* Ajusta el tamaño de fuente */
+        min-height: 40px;
+    }
+
+    .btn-reg {
+        padding: 8px 20px;
+        font-size: 14px;
+    }
+
+    .switch {
+        font-size: 12px; /* Escala el texto para dispositivos más pequeños */
+        text-align: center;
+    }
+}
+
+/* agregado extra animated------------- */
+.form_front {
+    animation: slideIn 1s ease-in-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 </style>
+

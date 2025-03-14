@@ -59,3 +59,14 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         "esAdmin": usuario.esAdmin,
         "imagen": usuario.imagen
     }
+# token de recuperacion 
+def generar_token_reset(user_id: int, email: str):
+    # Define los datos que quieres incluir en el token
+    payload = {
+        "sub": email,  # El correo electrónico como identificador principal
+        "user_id": user_id,  # El ID del usuario
+        "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)  # Expiración
+    }
+    # Genera el token
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return token

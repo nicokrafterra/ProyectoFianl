@@ -84,6 +84,9 @@ const volver = () => {
 <style scoped>
 .contpri {
 	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center; /* Fondo blanco para el contenedor principal */
 }
 
 .back-button {
@@ -98,11 +101,11 @@ const volver = () => {
 
 .back-button:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.3),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.3),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #002e02;
+	background-color: #6B8E23; /* Verde Oliva como fondo al hacer hover */
 	border-radius: 6px;
 }
 
@@ -114,16 +117,17 @@ const volver = () => {
 
 .pqrs-respondidos-container {
 	max-width: 800px;
-	margin: 30px auto;
+	width: 90%;
 	padding: 20px;
-	background: #f9f9f9;
+	background: #FFFFFF; /* Fondo blanco para el contenedor */
 	border-radius: 12px;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	border: 1px solid #8B5A2B; /* Marrón Tierra para el borde */
 }
 
 .pqrs-respondidos-container h1 {
 	text-align: center;
-	color: #333;
+	color: #6B8E23; /* Verde Oliva para el título */
 	font-size: 28px;
 	font-weight: 600;
 	margin-bottom: 20px;
@@ -133,36 +137,102 @@ table {
 	width: 100%;
 	border-collapse: collapse;
 	margin-top: 20px;
+	background-color: #F5DEB3; /* Beige Arena como fondo de la tabla */
+	border-radius: 8px;
+	overflow: hidden;
 }
 
 th,
 td {
 	padding: 12px;
 	text-align: left;
-	border: 1px solid #ddd;
+	border: 1px solid #8B5A2B; /* Marrón Tierra para los bordes de la tabla */
 }
 
 th {
-	background-color: #f4f4f4;
+	background-color: #D4A017; /* Amarillo Mostaza para el fondo de los encabezados */
 	font-weight: bold;
+	color: #FFFFFF; /* Texto blanco para contrastar */
 }
 
 td {
-	background-color: #fff;
+	background-color: #FFFFFF; /* Fondo blanco para las celdas */
 }
 
 tr:nth-child(even) td {
-	background-color: #f9f9f9;
+	background-color: #F5DEB3; /* Beige Arena para filas pares */
 }
 
 p {
 	text-align: center;
-	color: #555;
+	color: #6B8E23; /* Verde Oliva para el texto */
 	font-size: 16px;
 	margin-top: 20px;
 }
 
 p.v-else {
 	font-style: italic;
+	color: #C1440E; /* Rojo Terracota para texto adicional */
+}
+/*------------- responsive  -------------------------------------------*/
+@media (max-width: 768px) {
+    .contpri {
+        padding: 10px;
+    }
+
+    .back-button {
+        top: 10px;
+        left: 10px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .back-button img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .pqrs-respondidos-container {
+        max-width: 100%; 
+        padding: 28px;
+        margin: 120px auto;
+        font-size: 14px;
+    }
+
+    table {
+        font-size: 12px;
+        overflow-x: auto;
+        display: block;
+        width: 100%;
+    }
+
+    th, td {
+        padding: 8px;
+        font-size: 12px;
+        word-wrap: break-word;
+    }
+
+    h1 {
+        font-size: 25px;
+    }
+
+    p.v-else {
+        font-size: 20px;
+    }
+}
+/* Agregado extra*/
+.pqrs-respondidos-container {
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>

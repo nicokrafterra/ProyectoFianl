@@ -14,6 +14,10 @@
 					¿Aún no tienes cuenta?
 					<RouterLink to="/Registrar" class="signup_tog">Regístrate</RouterLink>
 				</p>
+				<p class="switch">
+					¿No recuerdas tu contraseña?
+					<RouterLink to="/RecuperarPasword" class="singup_top">Recuperar</RouterLink>
+				</p>
 			</div>
 		</div>
 	</div>
@@ -144,13 +148,23 @@ export default {
 /* Importación de estilos proporcionados */
 @import url(https://fonts.googleapis.com/css?family=Poppins:300);
 
+:root {
+	--verde-oliva: #6B8E23;
+	--marron-tierra: #8B5A2B;
+	--beige-arena: #F5DEB3;
+	--rojo-terracota: #C1440E;
+	--amarillo-mostaza: #D4A017;
+	--texto: #fff;
+	--fondo: #212121;
+}
+
 .container {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
 	width: 100%;
-
+	background-color: var(--marron-tierra); /* Fondo con Marrón Tierra */
 }
 
 .form {
@@ -171,46 +185,47 @@ export default {
 	backface-visibility: hidden;
 	padding: 65px 45px;
 	border-radius: 15px;
-	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
+	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.5),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 	backdrop-filter: blur(10px);
+	background-color: var(--beige-arena); /* Fondo del formulario con Beige Arena */
 }
 
 .input {
 	width: 245px;
 	min-height: 45px;
-	color: #fff;
+	color: var(--texto); /* Texto en blanco */
 	outline: none;
 	transition: 0.35s;
 	padding: 0px 7px;
-	background-color: #212121;
+	background-color: var(--fondo); /* Fondo del input con Marrón Tierra */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid var(--rojo-terracota); /* Borde con Rojo Terracota */
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
 }
 
 .input::placeholder {
-	color: #999;
+	color: var(--amarillo-mostaza); /* Placeholder con Amarillo Mostaza */
 }
 
 .input:focus {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.5),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
 .btn {
 	padding: 10px 35px;
 	cursor: pointer;
-	background-color: #212121;
+	background-color: var(--rojo-terracota); /* Fondo del botón con Rojo Terracota */
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	border: 2px solid var(--rojo-terracota); /* Borde con Rojo Terracota */
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5),
 		1px 1px 10px rgba(255, 255, 255, 0.6);
-	color: #fff;
+	color: var(--texto); /* Texto en blanco */
 	font-size: 15px;
 	font-weight: bold;
 	transition: 0.35s;
@@ -218,22 +233,22 @@ export default {
 
 .btn:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+	box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5),
 		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
+		inset 2px 2px 10px rgba(0, 0, 0, 0.5),
 		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
 .switch {
 	font-size: 13px;
-	color: white;
+	color: var(--texto); /* Texto en blanco */
 }
 
 .signup_tog {
 	font-weight: 700;
 	cursor: pointer;
 	text-decoration: none;
-	color: #fff;
+	color: var(--amarillo-mostaza); /* Enlace con Amarillo Mostaza */
 }
 
 .signup_tog:hover {

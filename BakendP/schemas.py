@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -64,3 +64,12 @@ class PlanResponse(PlanBase):
 
     class Config:
         from_attributes = True
+        
+        
+class EmailSchema(BaseModel):
+    email: EmailStr
+    
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    nueva_contraseña: str

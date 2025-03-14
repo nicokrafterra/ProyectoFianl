@@ -111,7 +111,8 @@ onMounted(obtenerRecorrido);
 <style scoped>
 .contpri {
   padding: 20px;
-  background: linear-gradient(135deg, #81ecec, #74b9ff);
+
+	background: #FFFFFF; /* Fondo blanco */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -137,7 +138,7 @@ onMounted(obtenerRecorrido);
 }
 
 .recorridos-section {
-  background: #ffffff;
+  background: linear-gradient(135deg, #F5DEB3, #D4A017); /* Beige Arena y Amarillo Mostaza */
   padding: 40px 30px;
   border-radius: 15px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
@@ -153,7 +154,7 @@ onMounted(obtenerRecorrido);
 .section-title {
   font-size: 2.8em;
   margin-bottom: 15px;
-  color: #2c3e50;
+  color: #6B8E23; /* Verde Oliva */
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -161,7 +162,7 @@ onMounted(obtenerRecorrido);
 
 .section-description {
   font-size: 1.2em;
-  color: #636e72;
+  color: #8B5A2B; /* Marrón Tierra */
   line-height: 1.5;
 }
 
@@ -172,7 +173,7 @@ onMounted(obtenerRecorrido);
 }
 
 .recorrido-card {
-  background: #ffffff;
+  background: #FFFFFF; /* Fondo blanco */
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
@@ -199,12 +200,12 @@ onMounted(obtenerRecorrido);
   font-size: 1.8em;
   margin-bottom: 10px;
   font-weight: bold;
-  color: #34495e;
+  color: #6B8E23; /* Verde Oliva */
 }
 
 .recorrido-description {
   font-size: 1.1em;
-  color: #7f8c8d;
+  color: #8B5A2B; /* Marrón Tierra */
   margin-bottom: 20px;
   line-height: 1.6;
 }
@@ -212,19 +213,19 @@ onMounted(obtenerRecorrido);
 .available-info {
   font-size: 1em;
   font-weight: bold;
-  color: #27ae60;
+  color: #4CAF50; /* Verde para disponibilidad */
   margin-bottom: 10px;
 }
 
 .unavailable-info {
   font-size: 1em;
   font-weight: bold;
-  color: #d63031;
+  color: #C1440E; /* Rojo Terracota para no disponibilidad */
 }
 
 .reserve-button {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
-  color: #ffffff;
+  background: linear-gradient(135deg, #6B8E23, #8B5A2B); /* Verde Oliva y Marrón Tierra */
+  color: #FFFFFF; /* Texto blanco */
   border: none;
   padding: 12px 20px;
   border-radius: 8px;
@@ -235,7 +236,7 @@ onMounted(obtenerRecorrido);
 }
 
 .reserve-button:hover {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  background: linear-gradient(135deg, #8B5A2B, #6B8E23); /* Marrón Tierra y Verde Oliva */
   transform: translateY(-2px);
 }
 

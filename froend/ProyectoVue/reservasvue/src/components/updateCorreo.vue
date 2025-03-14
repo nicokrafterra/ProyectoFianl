@@ -94,7 +94,7 @@ onMounted(() => {
 <style scoped>
 .back-button {
 	padding: 10px 15px;
-	background-color: #4caf50;
+	background-color: #6B8E23; /* Verde Oliva */
 	color: white;
 	border: none;
 	border-radius: 5px;
@@ -104,7 +104,7 @@ onMounted(() => {
 }
 
 .back-button:hover {
-	background-color: #ff9800;
+	background-color: #8B5A2B; /* Marrón Tierra */
 }
 
 .update-form {
@@ -113,13 +113,13 @@ onMounted(() => {
 	padding: 20px;
 	border-radius: 8px;
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-	background-color: #f9f9f9;
+	background-color: #F5DEB3;
 	font-family: Arial, sans-serif;
 }
 
 h2 {
 	text-align: center;
-	color: #333;
+	color: #6B8E23; /* Verde Oliva */
 	margin-bottom: 20px;
 }
 
@@ -127,21 +127,21 @@ label {
 	display: block;
 	margin-bottom: 8px;
 	font-weight: bold;
-	color: #555;
+	color: #8B5A2B; /* Marrón Tierra */
 }
 
 input {
-	width: 100%;
+	width: 90%;
 	padding: 10px;
 	margin-bottom: 15px;
-	border: 1px solid #ddd;
+	border: 1px solid #8B5A2B; /* Marrón Tierra */
 	border-radius: 4px;
 	font-size: 14px;
 	transition: border-color 0.3s;
 }
 
 input:focus {
-	border-color: #007bff;
+	border-color: #D4A017; /* Amarillo Mostaza */
 	outline: none;
 }
 
@@ -158,11 +158,11 @@ input:focus {
 }
 
 button[type="submit"] {
-	background-color: #28a745;
+	background-color: #6B8E23; /* Verde Oliva */
 }
 
 button[type="button"] {
-	background-color: #dc3545;
+	background-color: #C1440E; /* Rojo Terracota */
 }
 
 button:hover {
@@ -172,7 +172,7 @@ button:hover {
 p {
 	text-align: center;
 	margin-bottom: 20px;
-	color: #555;
+	color: #8B5A2B; /* Marrón Tierra */
 }
 
 @media (max-width: 500px) {

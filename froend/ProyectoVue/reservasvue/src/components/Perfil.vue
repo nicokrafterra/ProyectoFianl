@@ -1,21 +1,26 @@
 <template>
 	<div class="contp">
-	<button class="back-button" @click="volver">
-		<img src="../assets/IMG/arrow-left.svg" alt="Volver" />
-	</button>
-	<div id="Container-Perfil">
-		<h1>Nombre: {{ usuario.nombre }}</h1>
-		<p>Rol: {{ usuario.esAdmin? "Administrador":"Usuario" }}</p>
-		<p>Correo:{{ usuario.correoElectronico }}</p>
-		<p>Telefono: {{ usuario.numeroCelular }}</p>
-
-	</div>
+		<button class="back-button" @click="volver">
+			<i class="fas fa-arrow-left"></i> <!-- Icono de FontAwesome -->
+		</button>
+		<div class="card-container">
+			<div class="profile-card">
+				<div class="profile-header">
+					<i class="fas fa-user-circle"></i> <!-- Icono de usuario -->
+					<h1>{{ usuario.nombre }}</h1>
+				</div>
+				<div class="profile-info">
+					<p><i class="fas fa-user-tag"></i> Rol: {{ usuario.esAdmin ? "Administrador" : "Usuario" }}</p>
+					<p><i class="fas fa-envelope"></i> Correo: {{ usuario.correoElectronico }}</p>
+					<p><i class="fas fa-phone"></i> Teléfono: {{ usuario.numeroCelular }}</p>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-
 
 export default {
 	computed: {
@@ -30,30 +35,15 @@ export default {
 </script>
 
 <style scoped>
+/* Importar FontAwesome */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
-.contp{
+.contp {
 	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
-#Container-Perfil {
-	text-align: center;
-	padding: 20px;
-	margin-top: 100px;
-	background-color: #ffffffb2;
-	width: 300px;
-	justify-self: center;
-}
-
-h1 {
-	margin: 0;
-	font-size: 24px;
-	color: #000000;
-}
-
-p {
-	font-size: 18px;
-	color: #000000;
-}
-
 
 .back-button {
 	position: absolute;
@@ -63,21 +53,70 @@ p {
 	border: none;
 	cursor: pointer;
 	transition: 0.35s;
+	font-size: 24px;
+	color: #6B8E23; /* Verde Oliva */
 }
 
-.back-button:hover{
+.back-button:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-		background-color: #002e02;
-		border-radius: 6px;
+	color: #8B5A2B; /* Marrón Tierra al hacer hover */
 }
 
-.back-button img {
-	width: 24px;
-	height: 24px;
-	transition: transform 0.2s ease;
+.card-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+}
+
+.profile-card {
+	background-color: #F5DEB3; /* Beige Arena como fondo principal */
+	border-radius: 15px;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Sombra suave */
+	padding: 30px;
+	width: 300px;
+	text-align: center;
+	animation: fadeInUp 0.8s ease-out; /* Animación de entrada */
+}
+
+.profile-header {
+	margin-bottom: 20px;
+}
+
+.profile-header i {
+	font-size: 60px;
+	color: #6B8E23; /* Verde Oliva */
+}
+
+.profile-header h1 {
+	margin: 10px 0;
+	font-size: 24px;
+	color: #6B8E23; /* Verde Oliva */
+}
+
+.profile-info p {
+	font-size: 16px;
+	color: #8B5A2B; /* Marrón Tierra */
+	margin: 10px 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.profile-info i {
+	margin-right: 10px;
+	color: #D4A017; /* Amarillo Mostaza */
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 </style>

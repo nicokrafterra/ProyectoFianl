@@ -95,13 +95,16 @@ const volver = () => {
 
 <style scoped>
 .plato-list {
-	width: 700px;
+	width: 90%; /* Ajuste para ocupar más espacio */
+	max-width: 1200px; /* Límite máximo para no estirarse demasiado */
 	margin: 0 auto;
-	padding: 20px;
+	padding: 40px 20px; /* Más padding para mejor espaciado */
 	margin-top: 90px;
 	text-align: center;
 	position: relative;
-	background-color: #ffffffa1;
+	background-color: #F5DEB3; /* Beige Arena como fondo */
+	border-radius: 15px; /* Bordes redondeados */
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Sombra suave */
 }
 
 .back-button {
@@ -124,69 +127,69 @@ const volver = () => {
 }
 
 h2 {
-	color: #333;
+	color: #6B8E23; /* Verde Oliva para el título */
 	font-size: 2.5rem;
 	margin-bottom: 30px;
 }
 
 .cards-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  justify-content: center;
-  gap: 20px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive */
+	justify-content: center;
+	gap: 20px;
+	padding: 20px; /* Espaciado interno */
 }
 
 .card {
-  width: 200px; /* Ancho fijo */
-  background-color: #fff;
-  border-radius: 15px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Transición simple */
+	width: 100%; /* Ocupa el 100% del espacio disponible */
+	background-color: #FFFFFF; /* Fondo blanco para las tarjetas */
+	border-radius: 15px;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-  transform: scale(1.05); /* Efecto de escalado suave al pasar el mouse */
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+	transform: scale(1.05);
+	box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
 .card-image {
-  width: 100%;
-  height: 150px; /* Ajusté la altura para que se vea mejor en tarjetas pequeñas */
-  object-fit: cover;
-  border-bottom: 5px solid #ff9800;
+	width: 100%;
+	height: 150px;
+	object-fit: cover;
+	border-bottom: 5px solid #D4A017; /* Amarillo Mostaza para el borde inferior */
 }
 
 .card-content {
-  padding: 15px;
-  text-align: center;
+	padding: 15px;
+	text-align: center;
 }
 
 h3 {
-  color: #ff9800;
-  font-size: 1.2rem;
-  margin-bottom: 5px;
+	color: #8B5A2B; /* Marrón Tierra para el título de la tarjeta */
+	font-size: 1.2rem;
+	margin-bottom: 5px;
 }
 
 p {
-  color: #555;
-  font-size: 0.9rem;
+	color: #555; /* Texto gris oscuro */
+	font-size: 0.9rem;
 }
 
 .price {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #4caf50;
-  margin-top: 5px;
+	font-size: 1rem;
+	font-weight: bold;
+	color: #C1440E; /* Rojo Terracota para el precio */
+	margin-top: 5px;
 }
 
 @media (max-width: 768px) {
 	h2 {
 		font-size: 2rem;
 	}
-	.card-content {
-		padding: 15px;
-		grid-template-columns: repeat(2, 1fr);
+	.cards-container {
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Ajuste para tablets */
 	}
 	.price {
 		font-size: 1rem;
@@ -196,9 +199,6 @@ p {
 @media (max-width: 480px) {
 	h2 {
 		font-size: 1.5rem;
-	}
-	.card-content {
-		padding: 10px;
 	}
 	.card {
 		width: 100%;

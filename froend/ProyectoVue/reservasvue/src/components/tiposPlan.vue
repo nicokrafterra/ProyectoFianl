@@ -32,6 +32,9 @@ const volver = () => {
 </script>
 
 <style scoped>
+/* Importar FontAwesome para iconos */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+
 /* Estilos del botón "Volver" */
 .back-button {
 	position: absolute;
@@ -41,21 +44,13 @@ const volver = () => {
 	border: none;
 	cursor: pointer;
 	transition: 0.35s;
+	font-size: 24px;
+	color: #6B8E23; /* Verde Oliva */
 }
 
-.back-button:hover{
+.back-button:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-		background-color: #002e02;
-		border-radius: 6px;
-}
-
-.back-button img {
-	width: 24px;
-	height: 24px;
+	color: #8B5A2B; /* Marrón Tierra al hacer hover */
 }
 
 /* Contenedor central */
@@ -64,6 +59,7 @@ const volver = () => {
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
+ /* Beige Arena como fondo principal */
 }
 
 /* Menú de configuración */
@@ -73,72 +69,76 @@ const volver = () => {
 	justify-content: center;
 	align-items: center;
 	gap: 20px;
-	position: absolute;
-	backface-visibility: hidden;
-	padding: 65px 45px;
+	padding: 40px 30px;
 	border-radius: 15px;
-	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	backdrop-filter: blur(20px);
+	background-color: #F5DEB3;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Sombra suave */
 	width: 400px;
+	animation: fadeInUp 0.8s ease-out; /* Animación de entrada */
 }
-
 
 .menu h2 {
 	margin-bottom: 25px;
-	color: #000000;
+	color: #6B8E23; /* Verde Oliva */
 	font-weight: bold;
 	font-size: 1.5em;
-	font-family: 'Courier New', Courier, monospace
+	font-family: 'Courier New', Courier, monospace;
+	text-align: center;
 }
 
-
-.config-button {
-	padding: 10px 35px;
+/* Botones */
+.config-button,
+.eliminar-button {
+	width: 200px; /* Mismo ancho para todos los botones */
+	padding: 12px 20px;
 	cursor: pointer;
-	background-color: #212121;
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6);
-	color: #fff;
+	border: 2px solid transparent;
 	font-size: 15px;
 	font-weight: bold;
 	transition: 0.35s;
-	text-decoration: none;
-	width: 100px;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px; /* Espacio entre icono y texto */
+}
+
+.config-button {
+	background-color: #6B8E23; /* Verde Oliva */
+	color: #FFFFFF; /* Texto blanco */
 }
 
 .config-button:hover {
+	background-color: #8B5A2B; /* Marrón Tierra al hacer hover */
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-		background-color: #002e0d;
 }
 
-
 .eliminar-button {
-	padding: 10px 35px;
-	cursor: pointer;
-	background-color: #212121;
-	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6);
-	color: #fff;
-	font-size: 15px;
-	font-weight: bold;
-	transition: 0.35s;
+	background-color: #C1440E; /* Rojo Terracota */
+	color: #FFFFFF; /* Texto blanco */
 }
 
 .eliminar-button:hover {
+	background-color: #A8380B; /* Rojo más oscuro al hacer hover */
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-		background-color: #2e0000;
+}
+
+/* Iconos dentro de los botones */
+.config-button i,
+.eliminar-button i {
+	font-size: 18px;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 </style>

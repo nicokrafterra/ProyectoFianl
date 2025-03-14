@@ -39,9 +39,9 @@ const store = createStore({
     },
     actualizarFoto(state, nuevaRuta) {
       if (state.usuario) {
-        state.usuario.imagen = nuevaRuta;
+          state.usuario.imagen = nuevaRuta;
       }
-    },
+  },
     setTipoPlan(state, plan) {
       state.tipoPlan = plan;
     },

@@ -17,11 +17,13 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex'; // Importa useStore
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
 
 const router = useRouter();
+const store = useStore(); // Obtén el store
 const imagenInput = ref(null);
 const userId = ref(null); // Se extraerá desde el token JWT
 
@@ -46,40 +48,46 @@ const seleccionarImagen = () => {
 
 // Subir imagen de perfil
 const cambiarFoto = async (event) => {
-	const archivo = event.target.files[0];
-	if (!archivo) return;
+    const archivo = event.target.files[0];
+    if (!archivo) return;
 
-	const formData = new FormData();
-	formData.append("file", archivo);
+    const formData = new FormData();
+    formData.append("file", archivo);
 
-	try {
-		const response = await axios.put(
-			`http://localhost:8000/usuarios/${userId.value}/actualizar-foto`,
-			formData,
-			{
-				headers: {
-					"Content-Type": "multipart/form-data",
-					Authorization: `Bearer ${localStorage.getItem('token')}`, // Token en los headers
-				},
-			}
-		);
+    try {
+        const response = await axios.put(
+            `http://localhost:8000/usuarios/${userId.value}/actualizar-foto`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            }
+        );
 
-		Swal.fire({
-			icon: 'success',
-			title: 'Imagen actualizada',
-			text: 'Tu foto de perfil se ha actualizado correctamente.',
-		});
+        // Actualizar el store con la nueva ruta de la imagen
+        store.commit('actualizarFoto', response.data.ruta);
 
-	} catch (error) {
-		console.error("Error al subir la imagen:", error);
-		Swal.fire({
-			icon: 'error',
-			title: 'Error',
-			text: error.response?.data?.detail || 'No se pudo actualizar la foto de perfil.',
-		});
-	}
+
+		console.log("Store después de actualizar la imagen:", store.state.usuario);
+		
+        Swal.fire({
+            icon: 'success',
+            title: 'Imagen actualizada',
+            text: 'Tu foto de perfil se ha actualizado correctamente.',
+        });
+
+    } catch (error) {
+        console.error("Error al subir la imagen:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.response?.data?.detail || 'No se pudo actualizar la foto de perfil.',
+        });
+    }
 };
-
+      
 // Eliminar cuenta
 const eliminarCuenta = async () => {
 	Swal.fire({
@@ -137,6 +145,10 @@ onMounted(() => {
 
 
 <style scoped>
+/* Importar FontAwesome para iconos */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+
+/* Botón de regresar */
 .back-button {
 	position: absolute;
 	top: 20px;
@@ -145,21 +157,16 @@ onMounted(() => {
 	border: none;
 	cursor: pointer;
 	transition: 0.35s;
+	font-size: 24px;
+	color: #6B8E23; /* Verde Oliva */
+	width: 50px;
+	height: 40px;
 }
 
 .back-button:hover {
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #002e02;
-	border-radius: 6px;
-}
-
-.back-button img {
-	width: 24px;
-	height: 24px;
+	background-color: #8B5A2B; /* Marrón Tierra al hacer hover */
+	border-radius: 10px;
 }
 
 /* Contenedor central */
@@ -168,6 +175,7 @@ onMounted(() => {
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
+
 }
 
 /* Menú de configuración */
@@ -177,71 +185,76 @@ onMounted(() => {
 	justify-content: center;
 	align-items: center;
 	gap: 20px;
-	position: absolute;
-	backface-visibility: hidden;
-	padding: 65px 45px;
+	padding: 40px 30px;
 	border-radius: 15px;
-	box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	backdrop-filter: blur(20px);
+	background-color: #F5DEB3; /* Beige Arena como fondo principal */
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Sombra suave */
 	width: 400px;
+	animation: fadeInUp 0.8s ease-out; /* Animación de entrada */
 }
-
 
 .menu h2 {
 	margin-bottom: 25px;
-	color: #000000;
+	color: #6B8E23; /* Verde Oliva */
 	font-weight: bold;
 	font-size: 1.5em;
-	font-family: 'Courier New', Courier, monospace
+	font-family: 'Courier New', Courier, monospace;
+	text-align: center;
 }
 
-
-.config-button {
-	padding: 10px 35px;
+/* Botones */
+.config-button,
+.eliminar-button {
+	width: 300px; /* Mismo ancho para todos los botones */
+	padding: 12px 20px;
 	cursor: pointer;
-	background-color: #212121;
 	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6);
-	color: #fff;
+	border: 2px solid transparent;
 	font-size: 15px;
 	font-weight: bold;
 	transition: 0.35s;
-	text-decoration: none;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px; /* Espacio entre icono y texto */
+}
+
+.config-button {
+	background-color: #6B8E23; /* Verde Oliva */
+	color: #FFFFFF; /* Texto blanco */
 }
 
 .config-button:hover {
+	background-color: #8B5A2B; /* Marrón Tierra al hacer hover */
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #002e0d;
 }
 
-
 .eliminar-button {
-	padding: 10px 35px;
-	cursor: pointer;
-	background-color: #212121;
-	border-radius: 6px;
-	border: 2px solid #212121;
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6);
-	color: #fff;
-	font-size: 15px;
-	font-weight: bold;
-	transition: 0.35s;
+	background-color: #C1440E; /* Rojo Terracota */
+	color: #FFFFFF; /* Texto blanco */
 }
 
 .eliminar-button:hover {
+	background-color: #A8380B; /* Rojo más oscuro al hacer hover */
 	transform: scale(1.05);
-	box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
-		1px 1px 10px rgba(255, 255, 255, 0.6),
-		inset 2px 2px 10px rgba(0, 0, 0, 1),
-		inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-	background-color: #2e0000;
+}
+
+/* Iconos dentro de los botones */
+.config-button i,
+.eliminar-button i {
+	font-size: 18px;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 </style>

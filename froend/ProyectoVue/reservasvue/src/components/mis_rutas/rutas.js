@@ -26,6 +26,9 @@ import TiposPlan from "../tiposPlan.vue";
 import FormPlanes from "../FormPlanes.vue";
 import PlanesVer from "../planesVer.vue";
 
+import ResetPassword from "../ResetPassword.vue";
+import CorreoRecuperacion from "../correoRecuperacion.vue";
+
 const routes = [
     {
         path: "/index",
@@ -49,20 +52,18 @@ const routes = [
     },
     {
         path: '/',
-        redirect: '/Registrar',
+        redirect: '/index',
         meta: { showHeader: true }, 
     },
     {
         path: '/Registrar',
         name: 'Register',
         component: Register,
-        meta: { showHeader: true }, 
     },
     {
         path: '/Iniciar',
         name: 'Iniciar',
         component: Singin,
-        meta: { showHeader: true },  
     },
     {
         path: '/pqr',
@@ -158,7 +159,18 @@ const routes = [
         path: '/planVer',
         name: 'planVer',
         component: PlanesVer
+    },
+    {
+        path: '/ResetPassword',
+        name: 'ResetPassword',
+        component: ResetPassword
+    },
+    {
+        path: '/RecuperarPasword',
+        name: 'RecuperarPasword',
+        component: CorreoRecuperacion
     }
+    
 ];
 const router = createRouter({
     history: createWebHistory(),

@@ -163,23 +163,49 @@ onMounted(obtenerReservas);
 
 
 <style scoped>
-.reservas-container {
-	width: 80%;
-	margin: auto;
-	margin-top: 20px;
-	background-color: #f8f9fa;
-	padding: 20px;
-	border-radius: 10px;
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.contpri {
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
 }
 
-.contpri{
-	height: 100vh;
+.reservas-container {
+	width: 90%; /* Ocupa más espacio */
+	max-width: 1200px; /* Límite máximo para no estirarse demasiado */
+	margin: auto;
+	padding: 40px 20px; /* Más padding para mejor espaciado */
+	background-color: #F5DEB3; /* Beige Arena como fondo principal */
+	border-radius: 15px; /* Bordes redondeados */
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Sombra suave */
+	position: relative; /* Para posicionar el botón de regresar */
+}
+
+.back-button {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	transition: transform 0.2s ease;
+}
+
+.back-button img {
+	width: 30px;
+	height: 30px;
+}
+
+.back-button:hover {
+	transform: scale(1.1);
 }
 
 h2 {
 	text-align: center;
-	color: #234666;
+	color: #6B8E23; /* Verde Oliva para el título */
+	font-size: 2rem;
+	margin-bottom: 30px;
 }
 
 table {
@@ -190,24 +216,25 @@ table {
 
 th,
 td {
-	padding: 10px;
+	padding: 12px;
 	text-align: left;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #8B5A2B; /* Marrón Tierra para los bordes */
 }
 
 th {
-	background-color: #234666;
-	color: #fff;
+	background-color: #6B8E23; /* Verde Oliva para el encabezado */
+	color: #FFFFFF; /* Texto blanco para contraste */
+	font-weight: bold;
 }
 
 tr:hover {
-	background-color: #f1f1f1;
+	background-color: #F5DEB3; /* Beige Arena al hacer hover */
 }
 
 button {
 	padding: 10px 15px;
-	background-color: #4caf50;
-	color: white;
+	background-color: #D4A017; /* Amarillo Mostaza para el botón */
+	color: #FFFFFF; /* Texto blanco */
 	border: none;
 	border-radius: 5px;
 	cursor: pointer;
@@ -216,7 +243,7 @@ button {
 }
 
 button:hover {
-	background-color: #ff9800;
+	background-color: #8B5A2B; /* Marrón Tierra al hacer hover */
 }
 
 .action-button {
@@ -227,23 +254,45 @@ button:hover {
 }
 
 .pagar {
-	background-color: #007bff;
+	background-color: #4CAF50; /* Verde para el botón de pagar */
 }
 
 .pagar:hover {
-	background-color: #0056b3;
+	background-color: #45a049; /* Verde más oscuro al hacer hover */
 }
 
 .delete {
-	background-color: #f44336;
+	background-color: #C1440E; /* Rojo Terracota para el botón de eliminar */
 }
 
 .delete:hover {
-	background-color: #e53935;
+	background-color: #A8380B; /* Rojo más oscuro al hacer hover */
 }
 
 .estado-pagado {
-	color: green;
+	color: #4CAF50; /* Verde para indicar estado pagado */
 	font-weight: bold;
+}
+
+@media (max-width: 768px) {
+	.reservas-container {
+		width: 95%; /* Más ancho en pantallas pequeñas */
+		padding: 20px 10px;
+	}
+
+	h2 {
+		font-size: 1.5rem;
+	}
+
+	th,
+	td {
+		padding: 8px;
+		font-size: 14px;
+	}
+
+	button {
+		padding: 8px 12px;
+		font-size: 14px;
+	}
 }
 </style>
