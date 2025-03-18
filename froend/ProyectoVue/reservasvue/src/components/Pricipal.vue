@@ -17,9 +17,13 @@ const router = useRouter(); // Acceso al router de Vue
 const token = ref(localStorage.getItem("token")); // Obtiene el token del localStorage
 const usuario = computed(() => store.state.usuario); // Obtiene el usuario del store
 const imagenPorDefecto = ref("../assets/IMG/foto.png"); // Ruta de la imagen de perfil por defecto
-
 //---------------------------------------------------------------------------------------------------------------
 // Propiedad computada para obtener la URL de la imagen del store
+
+watch(() => store.state.usuario?.imagen, (nuevaImagen) => {
+  console.log("Nueva imagen en el store111:", nuevaImagen); // Depuración
+});
+
 const imagenPerfil = computed(() => {
     const imagen = store.state.usuario?.imagen; // Obtiene la imagen del usuario del store
     console.log("URL de la imagen en el componente:", imagen); // Depuración
@@ -30,7 +34,7 @@ const imagenPerfil = computed(() => {
 
 // Observar cambios en el store para la imagen del usuario
 watch(() => store.state.usuario?.imagen, (nuevaImagen) => {
-    console.log("Nueva imagen en el store:", nuevaImagen); // Depuración
+  console.log("Nueva imagen en el store222:", nuevaImagen); // Depuración
 });
 
 // Función para alternar la visibilidad del menú desplegable

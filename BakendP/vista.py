@@ -163,7 +163,6 @@ async def actualizar_correo_usuario(
     nuevo_correo: str = Body(..., embed=True), 
     db: Session = Depends(get_db)
 ):
-  
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if usuario is None:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")

@@ -28,7 +28,10 @@ const store = createStore({
   },
   mutations: {
     setUsuario(state, usuario) {
-      state.usuario = usuario;
+      state.usuario = {
+        ...usuario,
+        imagen: usuario.imagen || null, // Asegura que la propiedad imagen esté definida
+      };
     },
     setToken(state, token) {
       state.token = token;
@@ -38,10 +41,11 @@ const store = createStore({
       state.token = null;
     },
     actualizarFoto(state, nuevaRuta) {
+      console.log("Actualizando imagen en el store:", nuevaRuta); // Depuración
       if (state.usuario) {
-          state.usuario.imagen = nuevaRuta;
+        state.usuario.imagen = nuevaRuta;
       }
-  },
+    },
     setTipoPlan(state, plan) {
       state.tipoPlan = plan;
     },

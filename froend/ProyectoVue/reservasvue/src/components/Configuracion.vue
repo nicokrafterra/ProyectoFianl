@@ -58,6 +58,7 @@ const cambiarFoto = async (event) => {
         const response = await axios.put(
             `http://localhost:8000/usuarios/${userId.value}/actualizar-foto`,
             formData,
+			
             {
                 headers: {
                     "Content-Type": "multipart/form-data",
