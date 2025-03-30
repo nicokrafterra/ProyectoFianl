@@ -5,7 +5,7 @@ import bcrypt
 from fastapi import FastAPI, APIRouter , Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from conexion import crear, get_db
-from modelo import base, Usuario, Reserva, Pqr
+from modelo import Base, Usuario, Reserva, Pqr
 from schemas import RespuestaPQR, UsuarioBase as cli
 from schemas import ReservaU as usu
 from schemas import Login 
@@ -54,7 +54,7 @@ app.add_middleware(
     
     )
 
-base.metadata.create_all(bind=crear)
+Base.metadata.create_all(bind=crear)
 
 #-----------------------------------------------------------------------------------------
 #Metodos de usuario

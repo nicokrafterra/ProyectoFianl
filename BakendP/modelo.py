@@ -1,10 +1,10 @@
 from sqlalchemy import  DateTime, ForeignKey,Column, Integer, String, Boolean, Text, Enum, Index
-from conexion import base
+from conexion import Base
 from sqlalchemy.orm import relationship
 
 import enum
 
-class Usuario(base):
+class Usuario(Base):
     __tablename__ = "usuarios"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nombre = Column(String(100), unique=True, nullable=False) 
@@ -25,7 +25,7 @@ class TipoPlan(enum.Enum):
     Camping = "Camping"
     Evento = "Evento"
 
-class Reserva(base):
+class Reserva(Base):
     __tablename__ = "reservas"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id", ondelete="CASCADE"))
@@ -41,7 +41,7 @@ class Reserva(base):
     plan = relationship("Plan", back_populates="reservas", lazy="joined")
     
     
-class Pqr(base):
+class Pqr(Base):
     __tablename__ = "pqr"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False)
@@ -53,7 +53,7 @@ class Pqr(base):
 
 
 
-class Plan(base):
+class Plan(Base):
     __tablename__ = 'planes'
     
     id = Column(Integer, primary_key=True, index=True)
