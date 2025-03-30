@@ -12,6 +12,7 @@ import { watch } from 'vue'; // Para observar cambios en las propiedades reactiv
 const isHidden = ref(true); // Controla la visibilidad del menú desplegable
 const isFading = ref(false); // Controla la animación de desvanecimiento del menú
 const Menu = ref(null); // Referencia al menú desplegable
+
 const store = useStore(); // Acceso al store de Vuex
 const router = useRouter(); // Acceso al router de Vue
 const token = ref(localStorage.getItem("token")); // Obtiene el token del localStorage
@@ -20,16 +21,18 @@ const imagenPorDefecto = ref("../assets/IMG/foto.png"); // Ruta de la imagen de 
 //---------------------------------------------------------------------------------------------------------------
 // Propiedad computada para obtener la URL de la imagen del store
 
-watch(() => store.state.usuario?.imagen, (nuevaImagen) => {
-  console.log("Nueva imagen en el store111:", nuevaImagen); // Depuración
+watch(() => store.state.usuario?.imagen, (nuevaImagen, imagenAnterior) => {
+  if (nuevaImagen !== imagenAnterior) {
+    console.log("Nueva imagen detectada:", nuevaImagen);
+  }
 });
 
 const imagenPerfil = computed(() => {
-    const imagen = store.state.usuario?.imagen; // Obtiene la imagen del usuario del store
-    console.log("URL de la imagen en el componente:", imagen); // Depuración
-    return imagen
-        ? `http://localhost:8000/${imagen}?${Date.now()}` // Agrega un timestamp para evitar caché
-        : imagenPorDefecto.value; // Ruta de la imagen por defecto
+  const imagen = store.state.usuario?.imagen;
+  console.log("URL de la imagen en el componente:", imagen); // Depuración
+  return imagen
+    ? `http://localhost:8000/${imagen}?${Date.now()}` // Timestamp para evitar caché
+    : imagenPorDefecto.value;
 });
 
 // Observar cambios en el store para la imagen del usuario

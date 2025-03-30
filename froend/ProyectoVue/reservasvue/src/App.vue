@@ -9,7 +9,6 @@ const route = useRoute();
 
 
 <template>
-	
 	<Headerr v-if="route.meta.showHeader"/>
 	<RouterView />
 </template>

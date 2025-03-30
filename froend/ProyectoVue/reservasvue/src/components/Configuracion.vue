@@ -48,45 +48,40 @@ const seleccionarImagen = () => {
 
 // Subir imagen de perfil
 const cambiarFoto = async (event) => {
-    const archivo = event.target.files[0];
-    if (!archivo) return;
+  const archivo = event.target.files[0];
+  if (!archivo) return;
 
-    const formData = new FormData();
-    formData.append("file", archivo);
+  const formData = new FormData();
+  formData.append("file", archivo);
 
-    try {
-        const response = await axios.put(
-            `http://localhost:8000/usuarios/${userId.value}/actualizar-foto`,
-            formData,
-			
-            {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-            }
-        );
+  try {
+    const response = await axios.put(
+      `http://localhost:8000/usuarios/${userId.value}/actualizar-foto`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
 
-        // Actualizar el store con la nueva ruta de la imagen
-        store.commit('actualizarFoto', response.data.ruta);
+    // Llama a la acción para actualizar el token y el usuario en el store
+    await store.dispatch("actualizarFoto", response);
 
-
-		console.log("Store después de actualizar la imagen:", store.state.usuario);
-		
-        Swal.fire({
-            icon: 'success',
-            title: 'Imagen actualizada',
-            text: 'Tu foto de perfil se ha actualizado correctamente.',
-        });
-
-    } catch (error) {
-        console.error("Error al subir la imagen:", error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.response?.data?.detail || 'No se pudo actualizar la foto de perfil.',
-        });
-    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Imagen actualizada',
+      text: 'Tu foto de perfil se ha actualizado correctamente.',
+    });
+  } catch (error) {
+    console.error("Error al subir la imagen:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.response?.data?.detail || 'No se pudo actualizar la foto de perfil.',
+    });
+  }
 };
       
 // Eliminar cuenta
@@ -109,8 +104,6 @@ const eliminarCuenta = async () => {
 					},
 				});
 
-				// Eliminar el token y redirigir al login
-				localStorage.removeItem('token');
 
 				Swal.fire({
 					icon: 'success',
